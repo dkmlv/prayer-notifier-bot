@@ -9,7 +9,8 @@ from data import config
 
 client = motor.motor_asyncio.AsyncIOMotorClient('localhost', 27017)
 db = client.prayers
-collection = db.data
+cities = db.cities
+users = db.users
 
 bot = Bot(token=config.BOT_TOKEN, parse_mode=types.ParseMode.HTML)
 storage = MongoStorage()
