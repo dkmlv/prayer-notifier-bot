@@ -1,13 +1,18 @@
 import logging
 import os
+import motor.motor_asyncio
 
 from aiogram import Bot, Dispatcher, types
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.contrib.fsm_storage.mongo import MongoStorage
 
 from data import config
 
+client = motor.motor_asyncio.AsyncIOMotorClient('localhost', 27017)
+db = client.prayers
+collection = db.data
+
 bot = Bot(token=config.BOT_TOKEN, parse_mode=types.ParseMode.HTML)
-storage = MemoryStorage()
+storage = MongoStorage()
 dp = Dispatcher(bot, storage=storage)
 
 logging.basicConfig(
