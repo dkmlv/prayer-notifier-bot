@@ -1,7 +1,8 @@
 import logging
 import os
-import motor.motor_asyncio
+from apscheduler.schedulers.asyncio import AsyncIOScheduler as Scheduler
 
+import motor.motor_asyncio
 from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.mongo import MongoStorage
 
@@ -15,6 +16,9 @@ users = db.users
 bot = Bot(token=config.BOT_TOKEN, parse_mode=types.ParseMode.HTML)
 storage = MongoStorage()
 dp = Dispatcher(bot, storage=storage)
+
+sched = Scheduler(daemon=True)
+sched.start()
 
 logging.basicConfig(
     level=logging.INFO,
