@@ -4,9 +4,9 @@ This part deals with the main functionality of the bot: scheduling reminders.
 
 import datetime as dt
 import logging
-import requests
 from random import randint
 
+import requests
 from aiogram import types
 
 from loader import bot, cities, sched, users
@@ -47,14 +47,18 @@ async def send_reminder(some_id: int, txt: str):
         await bot.send_message(some_id, txt)
     except exceptions.BotBlocked:
         log.error(f"Target [ID:{some_id}]: blocked by user")
+        await users.delete_one({"user_id": some_id})
     except exceptions.ChatNotFound:
         log.error(f"Target [ID:{some_id}]: invalid user ID")
     except exceptions.RetryAfter as e:
-        log.error(f"Target [ID:{some_id}]: Flood limit is exceeded. Sleep {e.timeout} seconds.")
+        log.error(
+            f"Target [ID:{some_id}]: Flood limit is exceeded. Sleep {e.timeout} seconds."
+        )
         await asyncio.sleep(e.timeout)
         return await send_message(user_id, text)  # Recursive call
     except exceptions.UserDeactivated:
         log.error(f"Target [ID:{some_id}]: user is deactivated")
+        await users.delete_one({"user_id": some_id})
     except exceptions.TelegramAPIError:
         log.exception(f"Target [ID:{some_id}]: failed")
     else:
@@ -116,15 +120,22 @@ async def schedule_one(message: types.Message):
         if item == "Fajr":
             text = (
                 "Time to pray for Fajr.\nMake sure that you pray before "
-                f"sunrise, which is at {sunrise}."
+                "sunrise, which is at {}.".format(sunrise)
             )
         else:
-            text = f"Time to pray for {item}."
+            text = "Time to pray for {}.".format(item)
 
         # scheduling the reminder
         sched.add_job(
-            send_reminder, "date", run_date=prayer_times[item], args=[user_id, text]
+            send_reminder,
+            "date",
+            run_date=prayer_times[item],
+            args=[user_id, text],
+            id=str(user_id) + item,
+            replace_existing=True,
         )
+
+    sched.print_jobs()
 
 
 async def schedule_all():
@@ -194,15 +205,19 @@ async def schedule_all():
                 if item == "Fajr":
                     text = (
                         "Time to pray for Fajr.\nMake sure that you pray before "
-                        f"sunrise, which is at {sunrise}."
+                        "sunrise, which is at {}.".format(sunrise)
                     )
                 else:
-                    text = f"Time to pray for {item}."
+                    text = "Time to pray for {}.".format(item)
 
                 sched.add_job(
-                    send_reminder, "date", run_date=time, args=[user_id, text]
+                    send_reminder,
+                    "date",
+                    run_date=time,
+                    args=[user_id, text],
+                    id=str(user_id) + item,
+                    replace_existing=True,
                 )
 
 
 sched.add_job(schedule_all, "cron", day="*", hour=2)
-

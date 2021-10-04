@@ -1,5 +1,5 @@
 import logging
-import datetime
+import datetime as dt
 
 import requests
 from aiogram import types
@@ -8,6 +8,7 @@ from aiogram.dispatcher.filters.state import State
 
 from loader import cities, dp, sched, users
 from handlers.schedule_messages import schedule_one
+
 
 setup_in_progress = State()
 
@@ -36,17 +37,9 @@ async def give_help(message: types.Message):
         "Once you start a chat with the bot, you should type the name of "
         "the city where you currently live. That's about it.\nYou will "
         "receive reminders around 5 minutes before each prayer.\n\n"
-        "<b>Additional:</b> To change the city, send the "
-        "<b><i>/settings</i></b> command and change it there.\n"
+        "<b>Additional:</b> To change the city, just use the "
+        "<b><i>/start</i></b> command again."
     )
-
-
-@dp.message_handler(commands="settings", state="*")
-async def give_help(message: types.Message):
-    """
-    Open up the settings menu where the user will be able to change the city.
-    """
-    await message.reply("work in progress, not implemented yet.")
 
 
 @dp.message_handler(state=setup_in_progress)
@@ -63,10 +56,7 @@ async def add_user(message: types.Message, state: FSMContext):
     if document is None:
         # make a get request to the prayer times api, get the prayer times
         # for this city
-        parameters = {
-                "city": city_name,
-                "juristic": 1
-                }
+        parameters = {"city": city_name, "juristic": 1}
         response = requests.get(
             "https://api.pray.zone/v2/times/today.json", params=parameters
         )
@@ -76,27 +66,24 @@ async def add_user(message: types.Message, state: FSMContext):
             response.raise_for_status()
         except requests.exceptions.HTTPError:
             await message.reply(
-                "Sorry, the prayer times for that city are unavailable."
-                "Try typing in another city."
+                "Sorry, the prayer times for that city are unavailable. "
+                "Try typing in another city.\n\n"
+                "You can see if your city is available here:\n"
+                "https://prayertimes.date/api/docs/cities"
             )
             return
 
         response = response.json()
         times = response["results"]["datetime"][0]["times"]
-        offset = response["results"]["location"]["local_offset"]
 
         await cities.insert_one(
-            {"city": city_name, "times": times, "time_offset": offset}
+            {"city": city_name, "times": times}
         )
 
     user_data = {"user_id": user_id, "city": city_name}
     await users.update_one({"user_id": user_id}, {"$set": user_data}, upsert=True)
 
     await message.reply("All right, the setup is done.")
-
-    date_obj = datetime.datetime.fromisoformat(
-            str(datetime.date.today()) + " 17:01"
-            )
 
     await schedule_one(message)
 
