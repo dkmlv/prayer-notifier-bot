@@ -16,13 +16,10 @@ async def update_all():
     """
     Makes GET requests to the prayer times API and updates the prayer times.
     """
-    # get all the cities without the "_id" key value pair
     city_data = cities.find({}, {"_id": 0})
     city_data = await city_data.to_list(length=100)
 
     for city in city_data:
-        # make a get request to the prayer times api, get the prayer times
-        # for this city
         parameters = {"city": city["city"], "juristic": 1}
         response = requests.get(
             "https://api.pray.zone/v2/times/today.json", params=parameters
@@ -32,7 +29,6 @@ async def update_all():
         response = response.json()
         times = response["results"]["datetime"][0]["times"]
 
-        # update prayer times for today
         await cities.update_one({"city": city}, {"$set": {"times": times}})
 
 
@@ -42,27 +38,29 @@ async def send_reminder(some_id: int, txt: str):
 
     some_id -> user's id
     txt -> custom message to send to the user
+
+    (source: https://docs.aiogram.dev/en/latest/telegram/index.html)
     """
     try:
         await bot.send_message(some_id, txt)
     except exceptions.BotBlocked:
-        log.error(f"Target [ID:{some_id}]: blocked by user")
+        logging.error(f"Target [ID:{some_id}]: blocked by user")
         await users.delete_one({"user_id": some_id})
     except exceptions.ChatNotFound:
-        log.error(f"Target [ID:{some_id}]: invalid user ID")
+        logging.error(f"Target [ID:{some_id}]: invalid user ID")
     except exceptions.RetryAfter as e:
-        log.error(
+        logging.error(
             f"Target [ID:{some_id}]: Flood limit is exceeded. Sleep {e.timeout} seconds."
         )
         await asyncio.sleep(e.timeout)
         return await send_message(user_id, text)  # Recursive call
     except exceptions.UserDeactivated:
-        log.error(f"Target [ID:{some_id}]: user is deactivated")
+        logging.error(f"Target [ID:{some_id}]: user is deactivated")
         await users.delete_one({"user_id": some_id})
     except exceptions.TelegramAPIError:
-        log.exception(f"Target [ID:{some_id}]: failed")
+        logging.exception(f"Target [ID:{some_id}]: failed")
     else:
-        log.info(f"Target [ID:{user_id}]: success")
+        logging.info(f"Target [ID:{user_id}]: success")
 
 
 async def schedule_one(message: types.Message):
@@ -146,7 +144,6 @@ async def schedule_all():
     # update prayer times
     await update_all()
 
-    # get all the cities without the "_id" key value pair
     city_data = cities.find({}, {"_id": 0})
     city_data = await city_data.to_list(length=100)
 
@@ -188,9 +185,9 @@ async def schedule_all():
         for index, user in enumerate(city_users):
             user_id = user["user_id"]
 
-            # can't send more than 30 messages per sec, so every 25 messages,
+            # can't send more than 30 messages per sec, so every 20 messages,
             # we add a second
-            if index % 25 == 0:
+            if index % 20 == 0:
                 secs += 1
 
             for item in prayer_times:
@@ -220,4 +217,7 @@ async def schedule_all():
                 )
 
 
+# scheduling reminders will occur every day at 2 am
+# 2 am was picked since there are no prayers at this time
 sched.add_job(schedule_all, "cron", day="*", hour=2)
+

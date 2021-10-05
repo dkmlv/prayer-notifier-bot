@@ -1,0 +1,10 @@
+__pycache__
+README.md
+env
+.env.example
+.git
+.gitignore
+Dockerfile
+.dockerignore
+.DS_Store
+Icon?

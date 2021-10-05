@@ -21,7 +21,8 @@ async def ask_location(message: types.Message):
     """
     await message.reply(
         "Hello! Please send me the name of the city where you live "
-        "and you will be set."
+        "and you will be set.\n\n<b>NOTE:</b> currently, the bot only works "
+        "in Uzbekistan."
     )
 
     await setup_in_progress.set()
@@ -45,17 +46,14 @@ async def give_help(message: types.Message):
 @dp.message_handler(state=setup_in_progress)
 async def add_user(message: types.Message, state: FSMContext):
     """
-    Adds the user to the database.
+    Adds the user to the database. Schedules reminders for new user for today.
     """
     city_name = message.text
     user_id = message.from_user.id
 
     document = await cities.find_one({"city": city_name})
 
-    # if the city odes not already exist in the cities collection
     if document is None:
-        # make a get request to the prayer times api, get the prayer times
-        # for this city
         parameters = {"city": city_name, "juristic": 1}
         response = requests.get(
             "https://api.pray.zone/v2/times/today.json", params=parameters
@@ -76,9 +74,7 @@ async def add_user(message: types.Message, state: FSMContext):
         response = response.json()
         times = response["results"]["datetime"][0]["times"]
 
-        await cities.insert_one(
-            {"city": city_name, "times": times}
-        )
+        await cities.insert_one({"city": city_name, "times": times})
 
     user_data = {"user_id": user_id, "city": city_name}
     await users.update_one({"user_id": user_id}, {"$set": user_data}, upsert=True)
@@ -88,3 +84,4 @@ async def add_user(message: types.Message, state: FSMContext):
     await schedule_one(message)
 
     await state.finish()
+
