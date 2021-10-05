@@ -53,7 +53,7 @@ async def send_reminder(some_id: int, txt: str):
             f"Target [ID:{some_id}]: Flood limit is exceeded. Sleep {e.timeout} seconds."
         )
         await asyncio.sleep(e.timeout)
-        return await send_message(user_id, text)  # Recursive call
+        return await send_message(some_id, text)  # Recursive call
     except exceptions.UserDeactivated:
         logging.error(f"Target [ID:{some_id}]: user is deactivated")
         await users.delete_one({"user_id": some_id})
