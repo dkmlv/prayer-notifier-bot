@@ -13,7 +13,7 @@ everywhere.
 
 As mentioned above, this is a very basic bot. Reminders are scheduled every day
 at 2am. To obtain the prayer times, the following API is used:
-https://prayertimes.date/api (currently not working)
+https://prayertimes.date/api
 
 ## Installation
 

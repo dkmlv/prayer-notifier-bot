@@ -133,8 +133,6 @@ async def schedule_one(message: types.Message):
             replace_existing=True,
         )
 
-    sched.print_jobs()
-
 
 async def schedule_all():
     """
