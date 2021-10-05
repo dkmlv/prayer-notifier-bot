@@ -60,7 +60,7 @@ async def send_reminder(some_id: int, txt: str):
     except exceptions.TelegramAPIError:
         logging.exception(f"Target [ID:{some_id}]: failed")
     else:
-        logging.info(f"Target [ID:{user_id}]: success")
+        logging.info(f"Target [ID:{some_id}]: success")
 
 
 async def schedule_one(message: types.Message):
