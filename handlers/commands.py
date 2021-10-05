@@ -37,7 +37,7 @@ async def give_help(message: types.Message):
         "<b>Instructions:</b>\n"
         "Once you start a chat with the bot, you should type the name of "
         "the city where you currently live. That's about it.\nYou will "
-        "receive reminders around 5 minutes before each prayer.\n\n"
+        "receive reminders at around the time of every prayer.\n\n"
         "<b>Additional:</b> To change the city, just use the "
         "<b><i>/start</i></b> command again."
     )

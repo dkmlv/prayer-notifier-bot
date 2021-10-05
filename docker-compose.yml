@@ -1,15 +1,17 @@
-version: "3"
-  services:
-    bot:
-      build: .
-      restart: "unless-stopped"
-      depends_on:
-        - db
-    db:
-      image: mongo:latest
-      restart: "unless-stopped"
-      ports:
-        - "2717:27017"
-      container_name: db
-      volumes: ~/mongo/data:/data/db
+version: '3'
+
+services:
+  bot:
+    build: .
+    restart: 'unless-stopped'
+    depends_on:
+      - db
+  db:
+    image: mongo:latest
+    container_name: db
+    restart: 'unless-stopped'
+    ports:
+      - '27017:27017'
+    volumes:
+      - ~/mongo/data:/data/db
 

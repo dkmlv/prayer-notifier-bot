@@ -7,13 +7,13 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler as Scheduler
 
 from data import config
 
-client = motor.motor_asyncio.AsyncIOMotorClient("db", 2717)
+client = motor.motor_asyncio.AsyncIOMotorClient("db", 27017)
 db = client.prayers
 cities = db.cities
 users = db.users
 
 bot = Bot(token=config.BOT_TOKEN, parse_mode=types.ParseMode.HTML)
-storage = MongoStorage(host="db", port="2717")
+storage = MongoStorage(host="db", port="27017")
 dp = Dispatcher(bot, storage=storage)
 
 sched = Scheduler(daemon=True)
