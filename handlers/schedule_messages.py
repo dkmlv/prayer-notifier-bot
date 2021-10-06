@@ -117,11 +117,11 @@ async def schedule_one(message: types.Message):
         # Fajr reminder is different since the sunrise time has to be mentioned
         if item == "Fajr":
             text = (
-                "Time to pray for Fajr.\nMake sure that you pray before "
+                "Time to pray Fajr.\nMake sure that you pray before "
                 "sunrise, which is at {}.".format(sunrise)
             )
         else:
-            text = "Time to pray for {}.".format(item)
+            text = "Time to pray {}.".format(item)
 
         # scheduling the reminder
         sched.add_job(
@@ -141,6 +141,21 @@ async def schedule_all():
     """
     # update prayer times
     await update_all()
+
+    # obtaining today's date in hijri calendar
+    today = dt.date.today().strftime("%d-%m-%Y")
+    param = {"date": today}
+
+    response = requests.get("http://api.aladhan.com/v1/gToH", params=param)
+    response.raise_for_status()
+
+    response = response.json()["data"]["hijri"]
+    day = response["day"]
+    month = response["month"]["en"]
+    year = response["year"]
+    designation = response["designation"]["abbreviated"]
+
+    hijri_date = f"<b>{day} {month} {year} {designation}</b>\n"
 
     city_data = cities.find({}, {"_id": 0})
     city_data = await city_data.to_list(length=100)
@@ -183,6 +198,27 @@ async def schedule_all():
         for index, user in enumerate(city_users):
             user_id = user["user_id"]
 
+            # the first message the users will receive will be a list of prayer
+            # times for today with the date in Hijri calender
+            first_message = hijri_date
+
+            for item in city_times:
+                first_message += f"\n<b>{item}</b>: {city_times[item]}"
+
+            # u can pick any time u want, i just wanted to use this time
+            fajr_time = prayer_times["Fajr"]
+            minutes = dt.timedelta(minutes=30, seconds=index)
+            send_time = fajr_time - minutes
+
+            sched.add_job(
+                send_reminder,
+                "date",
+                run_date=send_time,
+                args=[user_id, first_message],
+                id=str(user_id) + "_general",
+                replace_existing=True,
+            )
+
             # can't send more than 30 messages per sec, so every 20 messages,
             # we add a second
             if index % 20 == 0:
@@ -199,11 +235,11 @@ async def schedule_all():
                 # be mentioned
                 if item == "Fajr":
                     text = (
-                        "Time to pray for Fajr.\nMake sure that you pray before "
+                        "Time to pray Fajr.\nMake sure that you pray before "
                         "sunrise, which is at {}.".format(sunrise)
                     )
                 else:
-                    text = "Time to pray for {}.".format(item)
+                    text = "Time to pray {}.".format(item)
 
                 sched.add_job(
                     send_reminder,
@@ -218,4 +254,3 @@ async def schedule_all():
 # scheduling reminders will occur every day at 2 am
 # 2 am was picked since there are no prayers at this time
 sched.add_job(schedule_all, "cron", day="*", hour=2)
-
