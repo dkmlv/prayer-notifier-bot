@@ -29,7 +29,7 @@ async def update_all():
         response = response.json()
         times = response["results"]["datetime"][0]["times"]
 
-        await cities.update_one({"city": city}, {"$set": {"times": times}})
+        await cities.update_one({"city": city["city"]}, {"$set": {"times": times}})
 
 
 async def send_reminder(some_id: int, txt: str):
