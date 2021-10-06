@@ -1,5 +1,3 @@
-Prayer time notifier bot for Telegram
-
 [![GitHub](https://img.shields.io/github/license/DurbeKK/prayer-notifier-bot)](https://github.com/DurbeKK/prayer-notifier-bot/blob/main/LICENSE) [![Telegram](https://img.shields.io/badge/telegram-%40prayersTgBot-blue)](https://t.me/prayersTgBot)
 
 # Prayer Notifier Bot
