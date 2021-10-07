@@ -54,9 +54,16 @@ async def add_user(message: types.Message, state: FSMContext):
     document = await cities.find_one({"city": city_name})
 
     if document is None:
-        parameters = {"city": city_name, "juristic": 1}
+        parameters = {
+            "city": city["city"],
+            "country": "Uzbekistan",
+            "school": 1,
+            "method": 3,
+            "month": month,
+            "year": year,
+        }
         response = requests.get(
-            "https://api.pray.zone/v2/times/today.json", params=parameters
+            "http://api.aladhan.com/v1/calendarByCity", params=parameters
         )
 
         # checking if the city is actually avaialble in the api
@@ -72,9 +79,25 @@ async def add_user(message: types.Message, state: FSMContext):
             return
 
         response = response.json()
-        times = response["results"]["datetime"][0]["times"]
 
-        await cities.insert_one({"city": city_name, "times": times})
+        today_data = response[day - 1]
+        times = today_data["timings"]
+
+        hijri_data = today_data["date"]["hijri"]
+        h_day = hijri_data["day"]
+        h_month = hijri_data["month"]["en"]
+        h_year = hijri_data["year"]
+        h_designation = hijri_data["designation"]["abbreviated"]
+
+        hijri_date = f"<b>{h_day} {h_month} {h_year} {h_designation}</b>\n"
+
+        await cities.insert_one(
+            {
+                "city": city_name,
+                "times": times,
+                "hijri": hijri_date,
+            }
+        )
 
     user_data = {"user_id": user_id, "city": city_name}
     await users.update_one({"user_id": user_id}, {"$set": user_data}, upsert=True)

@@ -12,11 +12,8 @@ everywhere.
 As mentioned above, this is a very basic bot. Reminders are scheduled every day
 at 2am.
 
-To obtain the prayer times, the following API is used:
-https://prayertimes.date/api
-
-To obtain the date in Hijri calender, this API is used:
-https://aladhan.com/islamic-calendar-api#GetGToH
+To obtain the prayer times and the date in Hijri calendar, the following API is used:
+https://aladhan.com/prayer-times-api
 
 ## Installation
 
