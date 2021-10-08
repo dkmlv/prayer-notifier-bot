@@ -235,20 +235,20 @@ async def schedule_all():
                     replace_existing=True,
                 )
 
-        # u can pick any time u want, i just wanted to use this time
-        fajr_time = prayer_times["Fajr"]
-        fajr_time = dt.datetime.fromisoformat(today + " " + fajr_time[:5])
-        minutes = dt.timedelta(minutes=30, seconds=index)
-        send_time = fajr_time - minutes
+            # u can pick any time u want, i just wanted to use this time
+            fajr_time = prayer_times["Fajr"]
+            fajr_time = dt.datetime.fromisoformat(today + " " + fajr_time[:5])
+            minutes = dt.timedelta(minutes=30, seconds=index)
+            send_time = fajr_time - minutes
 
-        sched.add_job(
-            send_reminder,
-            "date",
-            run_date=send_time,
-            args=[user_id, overview_msg],
-            id=str(user_id) + "_overview",
-            replace_existing=True,
-        )
+            sched.add_job(
+                send_reminder,
+                "date",
+                run_date=send_time,
+                args=[user_id, overview_msg],
+                id=str(user_id) + "_overview",
+                replace_existing=True,
+            )
 
 # scheduling reminders will occur every day at 2am
 # 2am was picked since there are no prayers at this time
