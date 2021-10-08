@@ -4,12 +4,13 @@ import logging
 import requests
 from aiogram import types
 from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters.state import State
+from aiogram.dispatcher.filters.state import State, StatesGroup
 
 from handlers.schedule_messages import schedule_one
 from loader import cities, dp, users
 
-setup_in_progress = State()
+class OnlyState(StatesGroup):
+    setup_in_progress = State()
 
 
 @dp.message_handler(commands="start")
@@ -24,7 +25,7 @@ async def ask_location(message: types.Message):
         "in Uzbekistan."
     )
 
-    await setup_in_progress.set()
+    await OnlyState.setup_in_progress.set()
 
 
 @dp.message_handler(commands="help", state="*")
@@ -38,11 +39,11 @@ async def give_help(message: types.Message):
         "the city where you currently live. That's about it.\nYou will "
         "receive reminders at around the time of every prayer.\n\n"
         "<b>Additional:</b> To change the city, just use the "
-        "<b><i>/start</i></b> command again."
+        "<b><code>/start</code></b> command again."
     )
 
 
-@dp.message_handler(state=setup_in_progress)
+@dp.message_handler(state=OnlyState.setup_in_progress)
 async def add_user(message: types.Message, state: FSMContext):
     """
     Adds the user to the database. Schedules reminders for new user for today.
@@ -85,7 +86,7 @@ async def add_user(message: types.Message, state: FSMContext):
 
         response = response.json()
 
-        today_data = response[day - 1]
+        today_data = response["data"][day - 1]
         times = today_data["timings"]
 
         not_needed = ["Imsak", "Sunset", "Midnight"]
@@ -108,7 +109,7 @@ async def add_user(message: types.Message, state: FSMContext):
             {
                 "city": city_name,
                 "times": times,
-                "hijri": hijri_date,
+                "hijri_date": hijri_date,
             }
         )
 
@@ -117,10 +118,18 @@ async def add_user(message: types.Message, state: FSMContext):
 
     await message.reply("All right, the setup is done.")
 
-    await schedule_one(message)
-
     await state.finish()
 
+    await schedule_one(message)
 
-@dp.message_handler()
-async def 
+
+
+@dp.message_handler(state=None)
+async def another_help_message(message: types.Message):
+    """
+    Will ask the user to type help to get more info.
+    This function will be called when the user types a random message or
+    message.
+    """
+    await message.reply("See <code>/help</code> for more information.")
+
