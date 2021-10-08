@@ -1,14 +1,13 @@
-import logging
 import datetime as dt
+import logging
 
 import requests
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State
 
-from loader import cities, dp, sched, users
 from handlers.schedule_messages import schedule_one
-
+from loader import cities, dp, users
 
 setup_in_progress = State()
 
@@ -53,9 +52,15 @@ async def add_user(message: types.Message, state: FSMContext):
 
     document = await cities.find_one({"city": city_name})
 
+    today = dt.date.today()
+
+    day = today.day
+    month = today.month
+    year = today.year
+
     if document is None:
         parameters = {
-            "city": city["city"],
+            "city": city_name,
             "country": "Uzbekistan",
             "school": 1,
             "method": 3,
@@ -83,6 +88,14 @@ async def add_user(message: types.Message, state: FSMContext):
         today_data = response[day - 1]
         times = today_data["timings"]
 
+        not_needed = ["Imsak", "Sunset", "Midnight"]
+        for item in not_needed:
+            times.pop(item)
+
+        for prayer, time in times.items():
+            # slicing is done because time is provided like: "04:54 (+05)"
+            times[prayer] = time[:5]
+
         hijri_data = today_data["date"]["hijri"]
         h_day = hijri_data["day"]
         h_month = hijri_data["month"]["en"]
@@ -108,3 +121,6 @@ async def add_user(message: types.Message, state: FSMContext):
 
     await state.finish()
 
+
+@dp.message_handler()
+async def 
