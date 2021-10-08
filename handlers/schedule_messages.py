@@ -194,11 +194,11 @@ async def schedule_all():
         # number of seconds (can't send more than 30 messages per second, so yeah)
         secs = 0
 
-        # this message will be sent out early morning before the fajr reminder
-        overview_msg = hijri_date + "Here are your prayer times for today:\n"
-
         for index, user in enumerate(city_users):
             user_id = user["user_id"]
+
+            # this message will be sent out early morning before the fajr reminder
+            overview_msg = hijri_date + "Here are your prayer times for today:\n"
 
             # can't send more than 30 messages per sec, so every 20 messages,
             # we add a second
