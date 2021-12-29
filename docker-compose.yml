@@ -8,8 +8,8 @@ services:
     env_file:
       - .env
     environment:
-      - MONGO_USERNAME = $DATABASE_ROOT_USERNAME
-      - MONGO_PASSWORD = $DATABASE_ROOT_PASSWORD
+      - MONGO_USERNAME=$DATABASE_ROOT_USERNAME
+      - MONGO_PASSWORD=$DATABASE_ROOT_PASSWORD
     networks:
       - prayers-network
     links:
@@ -21,8 +21,8 @@ services:
     env_file:
       - .env
     environment:
-      - MONGO_INITDB_ROOT_USERNAME = $DATABASE_ROOT_USERNAME
-      - MONGO_INITDB_ROOT_PASSWORD = $DATABASE_ROOT_PASSWORD
+      - MONGO_INITDB_ROOT_USERNAME=$DATABASE_ROOT_USERNAME
+      - MONGO_INITDB_ROOT_PASSWORD=$DATABASE_ROOT_PASSWORD
     volumes:
       - ~/mongo/data:/data/db
     networks:
