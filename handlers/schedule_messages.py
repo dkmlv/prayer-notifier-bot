@@ -7,100 +7,78 @@ import datetime as dt
 import logging
 from random import randint
 
-import requests
 from aiogram import types
 from aiogram.utils import exceptions
 
 from loader import bot, cities, sched, users
+from utils.get_prayer_times import get_prayer_times
 from utils.hijri_date import get_todays_hijri_date
 
 
 async def update_all():
+    """Make GET requests to the prayer times API and updates the prayer times.
+
+    Also update today's date in Hijri calendar.
     """
-    Makes GET requests to the prayer times API and updates the prayer times.
-    Also updates today's date in Hijri calendar.
-    """
+
     city_data = cities.find({}, {"_id": 0})
     city_data = await city_data.to_list(length=100)
 
-    today = dt.date.today()
-
-    day = today.day
-    month = today.month
-    year = today.year
-
     for city in city_data:
-        parameters = {
-            "city": city["city"],
-            "country": "Uzbekistan",
-            "school": 1,
-            "method": 3,
-            "month": month,
-            "year": year,
-        }
-        response = requests.get(
-            "http://api.aladhan.com/v1/calendarByCity", params=parameters
-        )
-        response.raise_for_status()
+        city_name = city["city"]
 
-        response = response.json()
-
-        today_data = response["data"][day - 1]
-        times = today_data["timings"]
-
-        not_needed = ["Imsak", "Sunset", "Midnight"]
-        for item in not_needed:
-            times.pop(item)
-
-        for prayer, time in times.items():
-            # slicing is done because time is provided like: "04:54 (+05)"
-            times[prayer] = time[:5]
+        prayer_times = await get_prayer_times(city_name)
 
         hijri_date = get_todays_hijri_date()
 
         await cities.update_one(
-            {"city": city["city"]},
-            {"$set": {"times": times, "hijri_date": hijri_date}},
+            {"city": city_name},
+            {"$set": {"times": prayer_times, "hijri_date": hijri_date}},
         )
 
 
-async def send_reminder(some_id: int, txt: str):
-    """
-    Sends a reminder to the user.
+async def send_reminder(user_id: int, txt: str):
+    """Send a reminder to pray to the user.
 
-    some_id -> user's id
-    txt -> custom message to send to the user
+    Parameters
+    ----------
+    user_id : int
+        Telegram user id of the person to whom the reminder will be sent
+    txt : str
+        Custom text message (the reminder) to send to the user
 
     (source: https://docs.aiogram.dev/en/latest/examples/broadcast_example.html)
     """
+
     try:
-        await bot.send_message(some_id, txt)
+        await bot.send_message(user_id, txt)
     except exceptions.BotBlocked:
-        logging.error(f"Target [ID:{some_id}]: blocked by user")
-        await users.delete_one({"user_id": some_id})
+        logging.error(f"Target [ID:{user_id}]: blocked by user")
+        await users.delete_one({"user_id": user_id})
     except exceptions.ChatNotFound:
-        logging.error(f"Target [ID:{some_id}]: invalid user ID")
+        logging.error(f"Target [ID:{user_id}]: invalid user ID")
     except exceptions.RetryAfter as e:
         logging.error(
-            f"Target [ID:{some_id}]: Flood limit is exceeded. Sleep {e.timeout} seconds."
+            f"Target [ID:{user_id}]: Flood limit is exceeded. Sleep {e.timeout} seconds."
         )
         await asyncio.sleep(e.timeout)
-        return await send_reminder(some_id, txt)  # Recursive call
+        return await send_reminder(user_id, txt)  # Recursive call
     except exceptions.UserDeactivated:
-        logging.error(f"Target [ID:{some_id}]: user is deactivated")
-        await users.delete_one({"user_id": some_id})
+        logging.error(f"Target [ID:{user_id}]: user is deactivated")
+        await users.delete_one({"user_id": user_id})
     except exceptions.TelegramAPIError:
-        logging.exception(f"Target [ID:{some_id}]: failed")
+        logging.exception(f"Target [ID:{user_id}]: failed")
     else:
-        logging.info(f"Target [ID:{some_id}]: success")
+        logging.info(f"Target [ID:{user_id}]: success")
 
 
 async def schedule_one(message: types.Message):
-    """
-    Schedule reminders for one user (new user).
+    """Schedule reminders for one user (new user).
+
     This function will be called when a new user starts a chat with the bot.
     The 'message' argument refers to the city that the user will provide.
     """
+
     user_id = message.from_user.id
     city_name = message.text
 
@@ -108,18 +86,18 @@ async def schedule_one(message: types.Message):
     prayer_times = prayer_data["times"]
     hijri_date = prayer_data["hijri_date"]
 
-    # sunrise time will be sent in the Fajr reminder
-    sunrise = prayer_times.pop("Sunrise")
-
     today = str(dt.date.today())
 
     # this message will be sent out early morning before the fajr reminder
     overview_msg = hijri_date + "Here are your prayer times for today:\n"
 
+    # sunrise time will be sent in the Fajr reminder
+    sunrise = prayer_times.pop("Sunrise")
+
     for prayer, time in prayer_times.items():
         overview_msg += f"\n<code>{prayer+':':10}{time}</code>"
 
-        # apscheduler requires a datetime object to be passed in, so we make it here
+        # apscheduler requires a datetime object to be passed, we make it here
         prayer_time = dt.datetime.fromisoformat(today + " " + time)
 
         # there is a limit on how many messages can be sent in one second
@@ -145,6 +123,7 @@ async def schedule_one(message: types.Message):
             args=[user_id, text],
             id=str(user_id) + "_" + prayer,
             replace_existing=True,
+            misfire_grace_time=60,
         )
 
     # u can pick any time u want, i just wanted to use this time
@@ -153,20 +132,23 @@ async def schedule_one(message: types.Message):
     minutes = dt.timedelta(minutes=30, seconds=randint(0, 59))
     send_time = fajr_time - minutes
 
+    # scheduling the overview message containing prayer times for the day
     sched.add_job(
         send_reminder,
         "date",
         run_date=send_time,
         args=[user_id, overview_msg],
         id=str(user_id) + "_overview",
+        misfire_grace_time=60,
     )
 
 
 async def schedule_all():
-    """
-    Schedules reminders to pray for all users.
+    """Schedule reminders to pray for all users.
+
     This function is intended to be called once at the start of every day.
     """
+
     # update prayer times
     await update_all()
 
@@ -195,15 +177,15 @@ async def schedule_all():
             # this message will be sent out early morning before the fajr reminder
             overview_msg = hijri_date + "Here are your prayer times for today:\n"
 
-            # can't send more than 30 messages per sec, so every 20 messages,
+            # can't send more than 30 messages per sec, so every 15 messages,
             # we add a second
-            if index % 20 == 0:
+            if index % 15 == 0:
                 secs += 1
 
             for prayer, time in prayer_times.items():
                 overview_msg += f"\n<code>{prayer+':':10}{time}</code>"
 
-                # apscheduler requires a datetime object to be passed in, so we make it here
+                # apscheduler requires a datetime object to be passed, we make it here
                 prayer_time = dt.datetime.fromisoformat(today + " " + time)
                 seconds = dt.timedelta(seconds=secs)
                 # initially, prayer time does not have a seconds value
@@ -226,6 +208,7 @@ async def schedule_all():
                     args=[user_id, text],
                     id=str(user_id) + "_" + prayer,
                     replace_existing=True,
+                    misfire_grace_time=60,
                 )
 
             # u can pick any time u want, i just wanted to use this time
@@ -241,6 +224,7 @@ async def schedule_all():
                 args=[user_id, overview_msg],
                 id=str(user_id) + "_overview",
                 replace_existing=True,
+                misfire_grace_time=60,
             )
 
 
