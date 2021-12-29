@@ -15,7 +15,7 @@ at 2am.
 To obtain the prayer times, the following API is used:
 https://aladhan.com/prayer-times-api
 
-To obtain the hijri date, the follow package is used:
+To obtain the hijri date, the following package is used:
 https://hijri-converter.readthedocs.io/en/stable/index.html
 
 ## Installation
