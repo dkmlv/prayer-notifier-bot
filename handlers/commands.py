@@ -8,6 +8,8 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 
 from handlers.schedule_messages import schedule_one
 from loader import cities, dp, users
+from utils.hijri_date import get_todays_hijri_date
+
 
 class OnlyState(StatesGroup):
     setup_in_progress = State()
@@ -79,8 +81,6 @@ async def add_user(message: types.Message, state: FSMContext):
             await message.reply(
                 "Sorry, the prayer times for that city are unavailable. "
                 "Try typing in another city.\n\n"
-                "You can see if your city is available here:\n"
-                "https://prayertimes.date/api/docs/cities"
             )
             return
 
@@ -97,13 +97,7 @@ async def add_user(message: types.Message, state: FSMContext):
             # slicing is done because time is provided like: "04:54 (+05)"
             times[prayer] = time[:5]
 
-        hijri_data = today_data["date"]["hijri"]
-        h_day = hijri_data["day"]
-        h_month = hijri_data["month"]["en"]
-        h_year = hijri_data["year"]
-        h_designation = hijri_data["designation"]["abbreviated"]
-
-        hijri_date = f"<b>{h_day} {h_month} {h_year} {h_designation}</b>\n"
+        hijri_date = get_todays_hijri_date()
 
         await cities.insert_one(
             {
@@ -123,7 +117,6 @@ async def add_user(message: types.Message, state: FSMContext):
     await schedule_one(message)
 
 
-
 @dp.message_handler(state=None)
 async def another_help_message(message: types.Message):
     """
@@ -132,4 +125,3 @@ async def another_help_message(message: types.Message):
     message.
     """
     await message.reply("See <code>/help</code> for more information.")
-
