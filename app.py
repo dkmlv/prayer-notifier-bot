@@ -1,8 +1,7 @@
 from aiogram import executor
 
 import handlers
-# from handlers.schedule_messages import schedule_all
-from loader import dp, sched, session
+from loader import dp, session
 from utils.notify_admin import notify_on_shutdown, notify_on_startup
 from utils.set_bot_commands import set_default_commands
 
