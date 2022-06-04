@@ -1,9 +1,10 @@
-from loader import users
+from loader import users, cities
 from utils.city import process_city
+from utils.get_db_data import get_prayer_data
 from utils.schedule import schedule_one
 
 
-async def register_user(tg_user_id: int, location: str):
+async def register_user(tg_user_id: int, city: str):
     """Set up a new user to receieve prayer reminders.
 
     1. Add user to users collection
@@ -14,10 +15,12 @@ async def register_user(tg_user_id: int, location: str):
     ----------
     tg_user_id : int
         Telegram user id of the new user
-    location : str
-        New user's location, looks sth like: "Springfield, CO, US"
+    city : str
+        New user's location, looks sth like: "Ari, Abruzzo, Italy"
     """
 
-    await users.insert_one({"tg_user_id": tg_user_id, "location": location})
-    await process_city(location)
-    await schedule_one(tg_user_id, location)
+    await users.insert_one({"tg_user_id": tg_user_id, "city": city})
+    await process_city(city)
+
+    prayer_times, hijri_date = await get_prayer_data(city)
+    await schedule_one(tg_user_id, prayer_times, hijri_date)

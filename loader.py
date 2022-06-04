@@ -1,5 +1,6 @@
 import logging
 
+import aiohttp
 from motor.motor_asyncio import AsyncIOMotorClient
 from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.mongo import MongoStorage
@@ -18,6 +19,8 @@ db = client.prayers
 # mongodb collections
 cities = db.cities
 users = db.users
+
+session = aiohttp.ClientSession()
 
 bot = Bot(token=config.BOT_TOKEN, parse_mode=types.ParseMode.HTML)
 

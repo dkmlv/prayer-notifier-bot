@@ -7,12 +7,20 @@ with open("./data/cities.csv", newline="\n") as csvfile:
 
 CITIES = [row["name"] for row in DATA]
 
+
+# ------------------------- API URL -------------------------
+GET_TIMES_URL = "http://api.aladhan.com/v1/calendarByCity"
+
 # ------------------------- MESSAGES FOR THE BOT -------------------------
-INTRODUCTION = "Hello, I will help you with blah blah blah."
+INTRODUCTION = (
+    "As-salamu alaykum! I will remind you when it's time to pray so you "
+    "never miss a prayer again!"
+)
 FIRST_TIME_USER = (
     "Looks like you are a first-time user.\nTo get started, can you "
     "please send me your city name?"
 )
+SEE_HELP = "See <b>/help</b> for more information."
 HELP_MESSAGE = (
     "<b>Instructions:</b>\n"
     "Once you start a chat with the bot, you should type the name of "
@@ -21,9 +29,11 @@ HELP_MESSAGE = (
     "<b>NOTE:</b> To change the city, just use the "
     "<b>/start</b> command again."
 )
-SEE_HELP = "See <b>/help</b> for more information."
+SEVERAL_MATCHES = "Which one of these did you mean?"
+SPELLING_MISTAKE = "Did you mean one of these cities: {}?"
+SETUP_DONE = "Great, you are now to set to receive reminders."
+PICK_OPTION = "Please choose one of the options above."
 
-# ------------------------- STICKER FILE IDS -------------------------
-HI_STICKER = (
-    "CAACAgIAAxkBAAEBG6xik1mL3a1-ewaOpplo8tbVntFZMAACVAADQbVWDGq3-McIjQH6JAQ"
-)
+PRAYER_TIMES = "<b>{}</b>\nHere are your prayer times for today:\n\n{}"
+TIME_TO_PRAY = "Time to pray {}."
+SUNRISE = "Make sure that you pray before sunrise, which is at {}."
