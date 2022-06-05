@@ -1,13 +1,12 @@
-from dateutil import parser
 import datetime as dt
-import logging
 
+from dateutil import parser
 
 from loader import cities, sched
 from utils.hijri_date import get_hijri_date
-from utils.timezone import get_current_dt, get_tz_info
 from utils.prayer_times import get_prayer_times
 from utils.schedule import auto_schedule
+from utils.timezone import get_current_dt, get_tz_info
 
 
 async def setup_city(city: str):
@@ -47,7 +46,7 @@ async def setup_city(city: str):
         "hijri_date": hijri_date,
         "timings": prayer_times,
     }
-    await cities.insert_one(city_data)
+    await cities.update_one({"city": city}, {"$set": city_data}, upsert=True)
 
     run_dt = last_prayer_dt + dt.timedelta(minutes=15)
     sched.add_job(

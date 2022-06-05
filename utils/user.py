@@ -1,4 +1,4 @@
-from loader import users, cities
+from loader import users
 from utils.city import process_city
 from utils.get_db_data import get_prayer_data
 from utils.schedule import schedule_one

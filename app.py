@@ -1,16 +1,18 @@
 from aiogram import executor
 
 import handlers
-from loader import dp, session
+from loader import dp, session, sched
 from utils.notify_admin import notify_on_shutdown, notify_on_startup
 from utils.set_bot_commands import set_default_commands
+from utils.recreate_jobs import recreate_jobs
 
 
 async def on_startup(dispatcher):
     """Set default commands for the bot and notify of bot startup."""
     await set_default_commands(dispatcher)
     await notify_on_startup(dispatcher)
-    # await schedule_all()
+    sched.start()
+    await recreate_jobs()
 
 
 async def on_shutdown(dispatcher):

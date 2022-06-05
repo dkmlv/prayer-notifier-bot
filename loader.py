@@ -34,7 +34,6 @@ storage = MongoStorage(uri=fsm_uri)
 dp = Dispatcher(bot, storage=storage)
 
 sched = Scheduler(daemon=True)
-sched.start()
 
 logging.basicConfig(
     level=logging.INFO,
