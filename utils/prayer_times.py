@@ -7,7 +7,7 @@ from typing import Dict, Optional, Union
 import aiohttp.client_exceptions as exceptions
 from dateutil import parser
 
-from data.constants import GET_TIMES_URL, PRAYER_TIMES
+from data.constants import GET_TIMES_URL, PRAYER_TIMES, REGISTER_FIRST
 from loader import cities, session
 from utils.get_db_data import get_prayer_data, get_users_city
 from utils.timezone import get_tomorrows_dt
@@ -109,11 +109,15 @@ async def update_prayer_times(
 
     tomorrows_dt = get_tomorrows_dt(tz_info)
     prayer_times = await get_prayer_times(city, tomorrows_dt)
-    assert prayer_times is not None
 
-    city_data = {"timings": prayer_times}
-    await cities.update_one({"city": city}, {"$set": city_data}, upsert=True)
-    return prayer_times
+    if not prayer_times:
+        return
+    else:
+        city_data = {"timings": prayer_times}
+        await cities.update_one(
+            {"city": city}, {"$set": city_data}, upsert=True
+        )
+        return prayer_times
 
 
 async def generate_overview_msg(
@@ -152,6 +156,9 @@ async def generate_overview_msg(
 
     if not prayer_times and not hijri_date:
         city = await get_users_city(tg_user_id)
+        if not city:
+            return REGISTER_FIRST
+
         prayer_times, hijri_date = await get_prayer_data(city)
 
     prayer_times.pop("Sunrise", None)  # type: ignore

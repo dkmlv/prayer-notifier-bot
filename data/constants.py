@@ -31,9 +31,17 @@ HELP_MESSAGE = (
 )
 SEVERAL_MATCHES = "Which one of these did you mean?"
 SPELLING_MISTAKE = "Did you mean one of these cities: {}?"
-SETUP_DONE = "Great, you are now to set to receive reminders."
 PICK_OPTION = "Please choose one of the options above."
+SETUP_DONE = (
+    "Great, you are now to set to receive reminders.\nYou can now get prayer"
+    "times using /prayer_times command."
+)
+SOMETHING_WRONG = "Something went wrong. Please try /start again later."
 
 PRAYER_TIMES = "<b>{}</b>\nHere are your prayer times for today:\n\n{}"
 TIME_TO_PRAY = "Time to pray {}."
 SUNRISE = "Make sure that you pray before sunrise, which is at {}."
+
+REGISTER_FIRST = (
+    "You have not set anything up yet. Please use /start to register now."
+)

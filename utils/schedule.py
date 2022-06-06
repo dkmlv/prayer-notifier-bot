@@ -9,6 +9,7 @@ from dateutil import parser
 
 from data.constants import SUNRISE, TIME_TO_PRAY
 from loader import bot, sched, users
+from utils.cleanup import cleanup_user
 from utils.hijri_date import update_hijri_date
 from utils.prayer_times import generate_overview_msg, update_prayer_times
 
@@ -42,6 +43,7 @@ async def send_message(
         )
     except exceptions.BotBlocked:
         logging.error(f"Target [ID:{user_id}]: blocked by user")
+        await cleanup_user(user_id)
     except exceptions.ChatNotFound:
         logging.error(f"Target [ID:{user_id}]: invalid user ID")
     except exceptions.RetryAfter as e:
@@ -52,6 +54,7 @@ async def send_message(
         return await send_message(user_id, text)  # Recursive call
     except exceptions.UserDeactivated:
         logging.error(f"Target [ID:{user_id}]: user is deactivated")
+        await cleanup_user(user_id)
     except exceptions.TelegramAPIError:
         logging.exception(f"Target [ID:{user_id}]: failed")
     else:
@@ -147,7 +150,8 @@ async def schedule_all(
 
     for index, tg_user_id in enumerate(tg_user_ids):
         seconds = index // 5  # 5 messages per second
-        await schedule_one(tg_user_id, prayer_times, hijri_date, seconds)
+        prayer_times_copy = prayer_times.copy()
+        await schedule_one(tg_user_id, prayer_times_copy, hijri_date, seconds)
 
 
 async def auto_schedule(city: str, tz_info: str):
@@ -167,18 +171,23 @@ async def auto_schedule(city: str, tz_info: str):
     """
 
     prayer_times = await update_prayer_times(city, tz_info)
-    assert prayer_times is not None
-    hijri_date = await update_hijri_date(city, tz_info)
-    await schedule_all(city, prayer_times, hijri_date)
 
-    last_prayer_dt = parser.parse(prayer_times["Isha"])
+    try:
+        assert prayer_times is not None
+    except AssertionError:
+        logging.error("Failed to update prayer times.")
+    else:
+        hijri_date = await update_hijri_date(city, tz_info)
+        await schedule_all(city, prayer_times, hijri_date)
 
-    run_dt = last_prayer_dt + dt.timedelta(minutes=15)
-    sched.add_job(
-        auto_schedule,
-        "date",
-        run_date=run_dt,
-        args=[city, tz_info],
-        id=f"Autoschedule_{city}",
-        misfire_grace_time=3600,
-    )
+        last_prayer_dt = parser.parse(prayer_times["Isha"])
+
+        run_dt = last_prayer_dt + dt.timedelta(minutes=15)
+        sched.add_job(
+            auto_schedule,
+            "date",
+            run_date=run_dt,
+            args=[city, tz_info],
+            id=f"Autoschedule_{city}",
+            misfire_grace_time=3600,
+        )

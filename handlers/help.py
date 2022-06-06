@@ -1,7 +1,7 @@
 from aiogram import types
 
-from loader import dp
 from data.constants import HELP_MESSAGE
+from loader import dp
 
 
 @dp.message_handler(commands="help", state="*")

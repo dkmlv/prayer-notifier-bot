@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Union
 
 from loader import cities, users
 
@@ -25,7 +25,7 @@ async def get_prayer_data(city: str) -> Tuple[dict, str]:
     return prayer_times, hijri_date
 
 
-async def get_users_city(tg_user_id: int) -> str:
+async def get_users_city(tg_user_id: int) -> Union[str, None]:
     """Get user's city from the DB and return it.
 
     Parameters
@@ -36,8 +36,13 @@ async def get_users_city(tg_user_id: int) -> str:
     Returns
     -------
     str
-        User's location, looks sth like: "Ari, Abruzzo, Italy"
+        User's location, looks sth like: "Ari, Abruzzo, Italy". If the user
+        does not exist in DB yet, return None.
     """
 
     user = await users.find_one({"tg_user_id": tg_user_id})
-    return user["city"]
+
+    if user:
+        return user.get("city")
+    else:
+        return None

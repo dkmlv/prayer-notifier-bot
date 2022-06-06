@@ -1,26 +1,27 @@
-from aiogram import executor
+from aiogram import Dispatcher, executor
 
 import handlers
-from loader import dp, session, sched
+from loader import dp, sched, session
 from utils.notify_admin import notify_on_shutdown, notify_on_startup
-from utils.set_bot_commands import set_default_commands
 from utils.recreate_jobs import recreate_jobs
+from utils.set_bot_commands import set_default_commands
 
 
-async def on_startup(dispatcher):
-    """Set default commands for the bot and notify of bot startup."""
+async def on_startup(dispatcher: Dispatcher):
+    """Operations to perform on startup."""
     await set_default_commands(dispatcher)
     await notify_on_startup(dispatcher)
     sched.start()
     await recreate_jobs()
 
 
-async def on_shutdown(dispatcher):
-    """Close connections and notify of bot shutdown."""
+async def on_shutdown(dispatcher: Dispatcher):
+    """Operations to perform on shutdown."""
     await session.close()
     await dispatcher.storage.close()
     await dispatcher.storage.wait_closed()
     await notify_on_shutdown(dispatcher)
+    sched.shutdown()
 
 
 if __name__ == "__main__":

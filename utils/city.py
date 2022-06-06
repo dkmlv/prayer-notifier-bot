@@ -9,7 +9,7 @@ from utils.schedule import auto_schedule
 from utils.timezone import get_current_dt, get_tz_info
 
 
-async def setup_city(city: str):
+async def setup_city(city: str) -> bool:
     """Get prayer times for the city and set up automatic scheduling.
 
     1. Get timezone information for the city.
@@ -22,21 +22,30 @@ async def setup_city(city: str):
     ----------
     city : str
         User's location, looks sth like: "Ari, Abruzzo, Italy"
+
+    Returns
+    -------
+    bool
+        True if setup was successful, False otherwise
     """
 
     tz_info = await get_tz_info(city)
-    assert tz_info is not None
+    if not tz_info:
+        return False
 
     gregorian_dt = current_dt = get_current_dt(tz_info)
     prayer_times = await get_prayer_times(city, current_dt)
-    assert prayer_times is not None
+    if not prayer_times:
+        return False
+
     last_prayer_dt = parser.parse(prayer_times["Isha"])
 
     if current_dt > last_prayer_dt:
         # no prayers left for today
         gregorian_dt = tomorrow_dt = current_dt + dt.timedelta(days=1)
         prayer_times = await get_prayer_times(city, tomorrow_dt)
-        assert prayer_times is not None
+        if not prayer_times:
+            return False
         last_prayer_dt = parser.parse(prayer_times["Isha"])
 
     hijri_date = get_hijri_date(gregorian_dt)
@@ -54,12 +63,14 @@ async def setup_city(city: str):
         "date",
         run_date=run_dt,
         args=[city, tz_info],
-        id="autoschedule_" + city,
+        id="Autoschedule_" + city,
         misfire_grace_time=3600,
     )
 
+    return True
 
-async def process_city(city: str):
+
+async def process_city(city: str) -> bool:
     """Process city information.
 
     Check whether city exists in DB and set it up if it doesn't.
@@ -68,9 +79,18 @@ async def process_city(city: str):
     ----------
     city : str
         User's location, looks sth like: "Ari, Abruzzo, Italy"
+
+    Returns
+    -------
+    bool
+        True if city is set up successfully or city already exists in DB, False
+        otherwise
     """
 
     document = await cities.find_one({"city": city})
 
     if not document:
-        await setup_city(city)
+        setup_successful = await setup_city(city)
+        return setup_successful
+
+    return True

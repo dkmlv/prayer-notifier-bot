@@ -12,7 +12,6 @@ from data.constants import (
     INTRODUCTION,
     PICK_OPTION,
     SEE_HELP,
-    SETUP_DONE,
     SEVERAL_MATCHES,
     SPELLING_MISTAKE,
 )
@@ -46,18 +45,17 @@ async def validate_city(message: types.Message, state: FSMContext):
     (we're all human) and closest matching city names are provided.
     """
 
-    city = message.text.capitalize()
+    city = message.text
 
     matches = [
-        f"{city}, {row['state_name']}, {row['country_name']}"
+        f"{row['name']}, {row['state_name']}, {row['country_name']}"
         for row in DATA
-        if row["name"] == city
+        if row["name"].lower() == city.lower()
     ]
 
     if len(matches) == 1:
         await state.finish()
         await register_user(message.from_user.id, matches[0])
-        await message.answer(SETUP_DONE)
     elif len(matches) > 1:
         # more than 1 city exists with that name
         await state.update_data(options=matches)
@@ -92,6 +90,5 @@ async def validate_specific_city(message: types.Message, state: FSMContext):
     if city in options:
         await state.finish()
         await register_user(message.from_user.id, city)
-        await message.answer(SETUP_DONE)
     else:
         await message.answer(PICK_OPTION)
