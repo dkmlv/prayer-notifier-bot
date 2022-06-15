@@ -44,5 +44,24 @@ async def get_users_city(tg_user_id: int) -> Union[str, None]:
 
     if user:
         return user.get("city")
-    else:
-        return None
+
+
+async def get_users_timezone(tg_user_id: int) -> Union[str, None]:
+    """Get user's timezone from the DB and return it.
+
+    Parameters
+    ----------
+    tg_user_id : int
+        User's Telegram id
+
+    Returns
+    -------
+    str
+        Timezone information string, like "Europe/Rome"
+    """
+
+    users_city = await get_users_city(tg_user_id)
+
+    if users_city:
+        city = await cities.find_one({"city": users_city})
+        return city.get("timezone")

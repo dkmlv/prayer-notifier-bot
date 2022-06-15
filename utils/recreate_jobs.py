@@ -1,14 +1,15 @@
 from loader import cities
 from utils.city import setup_city
 from utils.get_db_data import get_prayer_data
-from utils.schedule import schedule_all
+from utils.schedule import schedule_all, schedule_calendar_gen
 
 
 async def recreate_jobs():
     """Recreate jobs for the apscheduler.
 
     This function will be called on startup. Updates prayer times and schedules
-    reminders for everyone.
+    reminders for everyone. Also schedules calendar generation for all users
+    who have tracking on.
     """
 
     user_cities = await cities.find().to_list(None)
@@ -18,3 +19,5 @@ async def recreate_jobs():
         await setup_city(city)
         prayer_times, hijri_date = await get_prayer_data(city)
         await schedule_all(city, prayer_times, hijri_date)
+
+    await schedule_calendar_gen()

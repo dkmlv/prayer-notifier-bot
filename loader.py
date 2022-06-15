@@ -19,6 +19,7 @@ db = client.prayers
 # mongodb collections
 cities = db.cities
 users = db.users
+tracking = db.tracking
 
 session = aiohttp.ClientSession()
 

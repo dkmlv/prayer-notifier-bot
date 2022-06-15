@@ -1,28 +1,36 @@
 """Handler for the /start command."""
 
+import random
+import calendar
 from difflib import get_close_matches
 
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 
 from data.constants import (
+    ASK_PREFERENCE,
     CITIES,
     DATA,
     FIRST_TIME_USER,
     INTRODUCTION,
     PICK_OPTION,
+    PLEASE_WAIT,
+    PRAYERS,
     SEE_HELP,
     SEVERAL_MATCHES,
+    SOMETHING_WRONG,
     SPELLING_MISTAKE,
+    WEEKDAYS,
 )
-from loader import dp, users
+from loader import dp, tracking, users
 from states.all_states import Start
+from utils.timezone import get_current_dt, get_tz_info
 from utils.user import register_user
 
 
 @dp.message_handler(commands="start")
 async def greet_user(message: types.Message):
-    """Greet user, ask for their location if they are a first-time user."""
+    """Greet user, begin setup process if they are a first-time user."""
     await message.answer(INTRODUCTION)
 
     user = await users.find_one({"tg_user_id": message.from_user.id})
@@ -38,7 +46,7 @@ async def greet_user(message: types.Message):
 async def validate_city(message: types.Message, state: FSMContext):
     """Check that user has entered a real city name.
 
-    If only one city matches the name sent by user, the new user is registered.
+    If only one city matches the name sent by user, ask about tracking.
     If more than one city matches, user is asked to specify their location by
     choosing one of the options.
     If nothing matches, it is assumed that user made a spelling mistake
@@ -54,8 +62,21 @@ async def validate_city(message: types.Message, state: FSMContext):
     ]
 
     if len(matches) == 1:
-        await state.finish()
-        await register_user(message.from_user.id, matches[0])
+        await state.update_data(city=matches[0])
+        await Start.waiting_for_preference.set()
+
+        keyboard = types.InlineKeyboardMarkup(resize_keyboard=True)
+        buttons = [
+            types.InlineKeyboardButton(
+                text="Yes", callback_data="tracking_on"
+            ),
+            types.InlineKeyboardButton(
+                text="No", callback_data="tracking_off"
+            ),
+        ]
+        keyboard.add(*buttons)
+
+        await message.answer(ASK_PREFERENCE, reply_markup=keyboard)
     elif len(matches) > 1:
         # more than 1 city exists with that name
         await state.update_data(options=matches)
@@ -66,7 +87,7 @@ async def validate_city(message: types.Message, state: FSMContext):
         await message.answer(options)
     else:
         # probably a spelling mistake or sth
-        closest_matches = get_close_matches(city, CITIES)
+        closest_matches = get_close_matches(city.title(), CITIES)
         # marking up to make copying easier
         closest_matches = [f"<code>{m}</code>" for m in closest_matches]
         await message.answer(
@@ -79,8 +100,8 @@ async def validate_city(message: types.Message, state: FSMContext):
 async def validate_specific_city(message: types.Message, state: FSMContext):
     """Check if user has chosen one of the options presented to them.
 
-    Once the user enters a valid option, register the new user to recieve
-    reminders to pray.
+    Once the user enters a valid option, move on with setup process and ask
+    about tracking.
     """
 
     city = message.text
@@ -88,7 +109,97 @@ async def validate_specific_city(message: types.Message, state: FSMContext):
     options = state_data["options"]
 
     if city in options:
-        await state.finish()
-        await register_user(message.from_user.id, city)
+        await state.update_data(city=city)
+        await Start.waiting_for_preference.set()
+
+        keyboard = types.InlineKeyboardMarkup(resize_keyboard=True)
+        buttons = [
+            types.InlineKeyboardButton(
+                text="Yes", callback_data="tracking_on"
+            ),
+            types.InlineKeyboardButton(
+                text="No", callback_data="tracking_off"
+            ),
+        ]
+        keyboard.add(*buttons)
+
+        await message.answer(ASK_PREFERENCE, reply_markup=keyboard)
     else:
         await message.answer(PICK_OPTION)
+
+
+@dp.callback_query_handler(
+    text="tracking_on", state=Start.waiting_for_preference
+)
+async def turn_tracking_on(call: types.CallbackQuery, state: FSMContext):
+    """Turn tracking on for the user.
+
+    Create an entry for the user in the tracking collection. Move on and
+    register user.
+    """
+
+    await call.answer()
+    await call.message.delete_reply_markup()
+    await call.message.edit_text(PLEASE_WAIT)
+
+    tg_user_id = call.from_user.id
+    state_data = await state.get_data()
+    city = state_data["city"]
+
+    tz_info = await get_tz_info(city)
+
+    if tz_info:
+        current_dt = get_current_dt(tz_info)
+        current_month = current_dt.strftime("%B")
+
+        year_num, month_num = current_dt.year, current_dt.month
+        weekday, days_in_month = calendar.monthrange(year_num, month_num)
+
+        days = []
+
+        for _ in range(days_in_month):
+            data = {
+                prayer: random.choice(["Not Prayed", "Prayed", "Late"])
+                for prayer in PRAYERS
+            }
+            days.append(data)
+
+        # data = {prayer: "Not Prayed" for prayer in PRAYERS}
+        # days = [data.copy() for _ in range(days_in_month)]
+
+        # generate dictionary with NOT PRAYED data for each day of the month
+        tracking_data = {
+            "tg_user_id": tg_user_id,
+            str(year_num): {
+                current_month: {
+                    "starts_from": WEEKDAYS[weekday],
+                    "days": days,
+                },
+            },
+        }
+
+        await tracking.insert_one(tracking_data)
+
+        await state.finish()
+        await register_user(tg_user_id, city)
+    else:
+        await state.finish()
+        await call.message.answer(SOMETHING_WRONG)
+
+
+
+@dp.callback_query_handler(
+    text="tracking_off", state=Start.waiting_for_preference
+)
+async def turn_tracking_off(call: types.CallbackQuery, state: FSMContext):
+    """Turn tracking off for the user and register them."""
+    await call.answer()
+    await call.message.delete_reply_markup()
+    await call.message.edit_text(PLEASE_WAIT)
+
+    tg_user_id = call.from_user.id
+    state_data = await state.get_data()
+    city = state_data["city"]
+
+    await state.finish()
+    await register_user(tg_user_id, city)

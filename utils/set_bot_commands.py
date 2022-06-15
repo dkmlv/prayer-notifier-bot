@@ -12,5 +12,6 @@ async def set_default_commands(dp):
             types.BotCommand("start", "set up reminders"),
             types.BotCommand("prayer_times", "get prayer times"),
             types.BotCommand("help", "how to use the bot"),
+            types.BotCommand("cancel", "cancel current operation"),
         ]
     )

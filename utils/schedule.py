@@ -2,21 +2,21 @@ import asyncio
 import datetime as dt
 import logging
 import random
-from typing import Dict
+from typing import Any, Dict
 
-from aiogram import exceptions
+from aiogram import exceptions, types
 from dateutil import parser
 
-from data.constants import SUNRISE, TIME_TO_PRAY
-from loader import bot, sched, users
+from data.constants import DID_YOU_PRAY, SUNRISE, TIME_TO_PRAY
+from loader import bot, sched, tracking, users
 from utils.cleanup import cleanup_user
+from utils.get_db_data import get_users_timezone
 from utils.hijri_date import update_hijri_date
+from utils.prayer_calendar import send_prayer_calendar
 from utils.prayer_times import generate_overview_msg, update_prayer_times
 
 
-async def send_message(
-    user_id: int, text: str, disable_notification: bool = False
-) -> bool:
+async def send_message(user_id: int, text: str, reply_markup: Any = None):
     """Safe messages sender
 
     Source: https://docs.aiogram.dev/en/latest/examples/broadcast_example.html
@@ -27,20 +27,13 @@ async def send_message(
         Telegram user id
     text : str
         Text to send to the user
-    disable_notification : bool
-        Whether there should be a notification when the message is received, is
-        set to False by default
-
-    Returns
-    -------
-    bool
-        True if message was sent, False otherwise
+    reply_markup : Any
+        Reply markup to send with the message, could be an Inline keyboard, a
+        Reply keyboard or None (None by default)
     """
 
     try:
-        await bot.send_message(
-            user_id, text, disable_notification=disable_notification
-        )
+        await bot.send_message(user_id, text, reply_markup=reply_markup)
     except exceptions.BotBlocked:
         logging.error(f"Target [ID:{user_id}]: blocked by user")
         await cleanup_user(user_id)
@@ -59,8 +52,6 @@ async def send_message(
         logging.exception(f"Target [ID:{user_id}]: failed")
     else:
         logging.info(f"Target [ID:{user_id}]: success")
-        return True
-    return False
 
 
 async def schedule_one(
@@ -87,7 +78,9 @@ async def schedule_one(
     if not seconds:
         seconds = random.randint(0, 59)
 
-    sunrise = prayer_times.pop("Sunrise")
+    sunrise = parser.parse(prayer_times.pop("Sunrise")).strftime("%H:%M")
+
+    tracking_on = await tracking.find_one({"tg_user_id": tg_user_id})
 
     for prayer, time in prayer_times.items():
         prayer_dt = parser.parse(time) + dt.timedelta(seconds=seconds)
@@ -107,6 +100,38 @@ async def schedule_one(
             replace_existing=True,
             misfire_grace_time=600,
         )
+
+        if tracking_on:
+            month_name = prayer_dt.strftime("%B")
+            year, day = prayer_dt.year, prayer_dt.day
+            text = DID_YOU_PRAY.format(prayer)
+
+            keyboard = types.InlineKeyboardMarkup(row_width=2)
+            buttons = [
+                types.InlineKeyboardButton(
+                    text="Yes",
+                    callback_data=f"Prayed_{prayer}_{month_name}_{day}_{year}",
+                ),
+                types.InlineKeyboardButton(
+                    text="No", callback_data="NotPrayed"
+                ),
+                types.InlineKeyboardButton(
+                    text="Later (Qaza)",
+                    callback_data=f"Late_{prayer}_{month_name}_{day}_{year}",
+                ),
+            ]
+            keyboard.add(*buttons)
+
+            run_dt = prayer_dt + dt.timedelta(minutes=30)
+            sched.add_job(
+                send_message,
+                "date",
+                run_date=run_dt,
+                args=[tg_user_id, text, keyboard],
+                id=f"Tracking_{prayer}_{tg_user_id}",
+                replace_existing=True,
+                misfire_grace_time=600,
+            )
 
     # this message will be sent out early morning before the fajr reminder
     overview_msg = await generate_overview_msg(
@@ -190,4 +215,27 @@ async def auto_schedule(city: str, tz_info: str):
             args=[city, tz_info],
             id=f"Autoschedule_{city}",
             misfire_grace_time=3600,
+        )
+
+
+async def schedule_calendar_gen():
+    """Schedule calendar generation for all users who have tracking on."""
+    tracking_on_users = await tracking.find().to_list(None)
+
+    for user in tracking_on_users:
+        tg_user_id = user["tg_user_id"]
+        tz_info = await get_users_timezone(tg_user_id)
+
+        sched.add_job(
+            send_prayer_calendar,
+            "cron",
+            day=1,
+            month="*",
+            hour=0,
+            minute=5,
+            timezone=tz_info,
+            args=[tg_user_id, tz_info, user],
+            id=f"Calendar_{tg_user_id}",
+            replace_existing=True,
+            misfire_grace_time=86400,
         )
