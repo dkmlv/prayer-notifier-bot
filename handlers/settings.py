@@ -1,9 +1,9 @@
 from aiogram import types
 
-from data.constants import FIRST_TIME_USER, REGISTER_FIRST
+from data import FIRST_TIME_USER, REGISTER_FIRST
 from loader import dp, tracking, users
-from states.all_states import Start
-from utils.cleanup import cleanup_user
+from states import Start
+from utils import cleanup_user
 
 
 @dp.message_handler(commands="settings")

@@ -7,13 +7,16 @@ from typing import Any, Dict
 from aiogram import exceptions, types
 from dateutil import parser
 
-from data.constants import DID_YOU_PRAY, SUNRISE, TIME_TO_PRAY
+from data import DID_YOU_PRAY, SUNRISE, TIME_TO_PRAY
 from loader import bot, sched, tracking, users
-from utils.cleanup import cleanup_user
-from utils.get_db_data import get_users_timezone
-from utils.hijri_date import update_hijri_date
-from utils.prayer_calendar import send_prayer_calendar
-from utils.prayer_times import generate_overview_msg, update_prayer_times
+from utils import (
+    cleanup_user,
+    generate_overview_msg,
+    get_users_timezone,
+    send_prayer_calendar,
+    update_hijri_date,
+    update_prayer_times,
+)
 
 
 async def send_message(user_id: int, text: str, reply_markup: Any = None):

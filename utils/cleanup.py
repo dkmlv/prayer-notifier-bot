@@ -1,8 +1,8 @@
 from apscheduler.jobstores.base import JobLookupError
 
-from data.constants import PRAYERS
+from data import PRAYERS
 from loader import cities, sched, tracking, users
-from utils.get_db_data import get_users_city
+from utils import get_users_city
 
 
 async def cleanup_user(tg_user_id: int):

@@ -3,10 +3,13 @@ import datetime as dt
 from dateutil import parser
 
 from loader import cities, sched
-from utils.hijri_date import get_hijri_date
-from utils.prayer_times import get_prayer_times
-from utils.schedule import auto_schedule
-from utils.timezone import get_current_dt, get_tz_info
+from utils import (
+    auto_schedule,
+    get_current_dt,
+    get_hijri_date,
+    get_prayer_times,
+    get_tz_info,
+)
 
 
 async def setup_city(city: str) -> bool:

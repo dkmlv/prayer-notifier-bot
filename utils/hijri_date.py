@@ -1,10 +1,11 @@
 """This module is only responsible for returning today's hijri date."""
 
 import datetime as dt
+
 from hijri_converter import Gregorian
 
-from utils.timezone import get_tomorrows_dt
 from loader import cities
+from utils import get_tomorrows_dt
 
 
 def get_hijri_date(gregorian_dt: dt.datetime) -> str:

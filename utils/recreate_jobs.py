@@ -1,7 +1,5 @@
 from loader import cities
-from utils.city import setup_city
-from utils.get_db_data import get_prayer_data
-from utils.schedule import schedule_all, schedule_calendar_gen
+from utils import get_prayer_data, schedule_all, schedule_calendar_gen, setup_city
 
 
 async def recreate_jobs():

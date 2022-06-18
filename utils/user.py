@@ -1,8 +1,6 @@
-from data.constants import SETUP_DONE, SOMETHING_WRONG
+from data import SETUP_DONE, SOMETHING_WRONG
 from loader import dp, tracking, users
-from utils.city import process_city
-from utils.get_db_data import get_prayer_data
-from utils.schedule import schedule_one
+from utils import get_prayer_data, process_city, schedule_one
 
 
 async def register_user(tg_user_id: int, city: str):

@@ -1,13 +1,13 @@
 """Handler for the /start command."""
 
-import random
 import calendar
 from difflib import get_close_matches
+import random
 
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 
-from data.constants import (
+from data import (
     ASK_PREFERENCE,
     CITIES,
     DATA,
@@ -23,9 +23,8 @@ from data.constants import (
     WEEKDAYS,
 )
 from loader import dp, tracking, users
-from states.all_states import Start
-from utils.timezone import get_current_dt, get_tz_info
-from utils.user import register_user
+from states import Start
+from utils import get_current_dt, get_tz_info, register_user
 
 
 @dp.message_handler(commands="start")

@@ -7,7 +7,7 @@ from typing import Dict
 from PIL import Image, ImageDraw
 from aiogram import exceptions
 
-from data.constants import (
+from data import (
     CIRCLE_COORDS,
     COLORS,
     FIRST_MONDAY,
@@ -17,8 +17,7 @@ from data.constants import (
     WEEKDAYS,
 )
 from loader import bot
-from utils.cleanup import cleanup_user
-from utils.timezone import get_current_dt
+from utils import cleanup_user, get_current_dt
 
 
 def generate_pie_chart(data: Dict[str, str]) -> Image.Image:

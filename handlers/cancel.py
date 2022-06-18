@@ -1,7 +1,7 @@
 from aiogram import types
 from aiogram.dispatcher.storage import FSMContext
 
-from data.constants import OPERATION_CANCELLED
+from data import OPERATION_CANCELLED
 from loader import dp
 
 

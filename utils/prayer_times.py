@@ -7,10 +7,9 @@ from typing import Dict, Optional, Union
 import aiohttp.client_exceptions as exceptions
 from dateutil import parser
 
-from data.constants import GET_TIMES_URL, PRAYER_TIMES, REGISTER_FIRST
+from data import GET_TIMES_URL, PRAYER_TIMES, REGISTER_FIRST
 from loader import cities, session
-from utils.get_db_data import get_prayer_data, get_users_city
-from utils.timezone import get_tomorrows_dt
+from utils import get_prayer_data, get_tomorrows_dt, get_users_city
 
 
 async def get_prayer_times(

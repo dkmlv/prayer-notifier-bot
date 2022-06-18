@@ -1,17 +1,17 @@
 import logging
 
-import aiohttp
-from motor.motor_asyncio import AsyncIOMotorClient
 from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.mongo import MongoStorage
+import aiohttp
 from apscheduler.schedulers.asyncio import AsyncIOScheduler as Scheduler
+from motor.motor_asyncio import AsyncIOMotorClient
 
-from data import config
+from data import BOT_TOKEN, DB_HOST, DB_PASSWORD, DB_USER
 
 uri = "mongodb+srv://{}:{}@{}/prayers?retryWrites=true&w=majority".format(
-    config.DB_USER,
-    config.DB_PASSWORD,
-    config.DB_HOST,
+    DB_USER,
+    DB_PASSWORD,
+    DB_HOST,
 )
 client = AsyncIOMotorClient(uri)
 db = client.prayers
@@ -23,11 +23,11 @@ tracking = db.tracking
 
 session = aiohttp.ClientSession()
 
-bot = Bot(token=config.BOT_TOKEN, parse_mode=types.ParseMode.HTML)
+bot = Bot(token=BOT_TOKEN, parse_mode=types.ParseMode.HTML)
 
 fsm_uri = (
     "mongodb+srv://{}:{}@{}/aiogram_fsm?retryWrites=true&w=majority".format(
-        config.DB_USER, config.DB_PASSWORD, config.DB_HOST
+        DB_USER, DB_PASSWORD, DB_HOST
     )
 )
 storage = MongoStorage(uri=fsm_uri)

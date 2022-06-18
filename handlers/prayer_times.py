@@ -1,7 +1,7 @@
 from aiogram import types
 
 from loader import dp
-from utils.prayer_times import generate_overview_msg
+from utils import generate_overview_msg
 
 
 @dp.message_handler(commands="prayer_times")

@@ -2,9 +2,12 @@ from aiogram import Dispatcher, executor
 
 import handlers
 from loader import dp, sched, session
-from utils.notify_admin import notify_on_shutdown, notify_on_startup
-from utils.recreate_jobs import recreate_jobs
-from utils.set_bot_commands import set_default_commands
+from utils import (
+    notify_on_shutdown,
+    notify_on_startup,
+    recreate_jobs,
+    set_default_commands,
+)
 
 
 async def on_startup(dispatcher: Dispatcher):

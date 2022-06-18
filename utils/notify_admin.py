@@ -1,7 +1,8 @@
 import logging
 
 from aiogram import Dispatcher
-from data.config import ADMIN
+
+from data import ADMIN
 
 
 async def notify_on_startup(dp: Dispatcher):

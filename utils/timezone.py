@@ -5,7 +5,7 @@ from typing import Dict, Union
 import aiohttp.client_exceptions as exceptions
 from dateutil import tz
 
-from data.constants import GET_TIMES_URL
+from data import GET_TIMES_URL
 from loader import session
 
 

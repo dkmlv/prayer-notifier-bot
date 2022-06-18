@@ -1,6 +1,6 @@
 from aiogram import types
 
-from data.constants import HELP_MESSAGE
+from data import HELP_MESSAGE
 from loader import dp
 
 

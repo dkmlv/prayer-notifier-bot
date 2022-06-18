@@ -1,6 +1,6 @@
 from aiogram import types
-from data.constants import PLEASE_WAIT
 
+from data import PLEASE_WAIT
 from loader import dp, tracking
 
 
