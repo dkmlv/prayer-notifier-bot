@@ -104,14 +104,17 @@ async def update_prayer_times(
         User's location, looks sth like: "Springfield, CO, US"
     tz_info : str
         Timezone information string, like "America/Denver"
+
+    Returns
+    -------
+    Union[Dict[str, str], None]
+        The updated prayer times or None if the GET request to API failed
     """
 
     tomorrows_dt = get_tomorrows_dt(tz_info)
     prayer_times = await get_prayer_times(city, tomorrows_dt)
 
-    if not prayer_times:
-        return
-    else:
+    if prayer_times:
         city_data = {"timings": prayer_times}
         await cities.update_one(
             {"city": city}, {"$set": city_data}, upsert=True
@@ -124,7 +127,7 @@ async def generate_overview_msg(
     prayer_times: Optional[dict] = None,
     hijri_date: Optional[str] = None,
 ) -> str:
-    """Generate an message containing the prayer times for the day.
+    """Generate a message containing the prayer times for the day.
 
     Looks like this:
         4 Dhu al-Qi’dah 1443 AH

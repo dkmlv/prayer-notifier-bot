@@ -1,1 +1,1 @@
-from . import start, prayer_times, tracking, settings, help, cancel
+from . import cancel, help, start, prayer_times, tracking, settings

@@ -1,6 +1,6 @@
 from aiogram import types
 
-from data import FIRST_TIME_USER, REGISTER_FIRST
+from data import CAN_CANCEL, FIRST_TIME_USER, REGISTER_FIRST
 from loader import dp, tracking, users
 from states import Start
 from utils import cleanup_user
@@ -46,4 +46,5 @@ async def reset_all_settings(call: types.CallbackQuery):
     await cleanup_user(tg_user_id=tg_user_id)
 
     await call.message.edit_text(FIRST_TIME_USER)
+    await call.message.answer(CAN_CANCEL)
     await Start.waiting_for_city.set()

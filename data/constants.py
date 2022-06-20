@@ -72,6 +72,13 @@ REGISTER_FIRST = (
 OPERATION_CANCELLED = "Okay, cancelled."
 NOTED = "Noted, thank you!"
 
+CAN_CANCEL = "You can cancel this operation anytime using <b>/cancel</b>."
+CHECK_SPREADSHEET = (
+    "If you can't seem to find your region, try checking that it exists <a "
+    "href='https://docs.google.com/spreadsheets/d/1SRmeEf3S4APZInjxnMjUft5kWhP"
+    "r2MwP0_Ya6NwZAyA/edit?usp=sharing'>here</a>."
+)
+
 # ------------------------- FONTS (PRAYER CAL) -------------------------
 MONTH_FONT = ImageFont.truetype("./assets/SinkinSans-700Bold.otf", 250)
 NUM_FONT = ImageFont.truetype("./assets/SinkinSans-700Bold.otf", 100)

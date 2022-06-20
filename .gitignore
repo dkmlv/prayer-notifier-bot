@@ -128,5 +128,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# MacOS thingy
 .DS_Store
 Icon?
+
+# Temporary folder
+temp/

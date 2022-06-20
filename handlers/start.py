@@ -1,5 +1,3 @@
-"""Handler for the /start command."""
-
 import calendar
 from difflib import get_close_matches
 
@@ -8,6 +6,8 @@ from aiogram.dispatcher import FSMContext
 
 from data import (
     ASK_PREFERENCE,
+    CAN_CANCEL,
+    CHECK_SPREADSHEET,
     CITIES,
     DATA,
     FIRST_TIME_USER,
@@ -35,6 +35,7 @@ async def greet_user(message: types.Message):
 
     if not user:
         await message.answer(FIRST_TIME_USER)
+        await message.answer(CAN_CANCEL)
         await Start.waiting_for_city.set()
     else:
         await message.answer(SEE_HELP)
@@ -63,7 +64,7 @@ async def validate_city(message: types.Message, state: FSMContext):
         await state.update_data(city=matches[0])
         await Start.waiting_for_preference.set()
 
-        keyboard = types.InlineKeyboardMarkup(resize_keyboard=True)
+        keyboard = types.InlineKeyboardMarkup()
         buttons = [
             types.InlineKeyboardButton(
                 text="Yes", callback_data="tracking_on"
@@ -92,6 +93,7 @@ async def validate_city(message: types.Message, state: FSMContext):
             SPELLING_MISTAKE.format(", ".join(closest_matches))
         )
         await message.answer(SEVERAL_MATCHES)
+        await message.answer(CHECK_SPREADSHEET, disable_web_page_preview=True)
 
 
 @dp.message_handler(state=Start.specifying_city)
@@ -110,7 +112,7 @@ async def validate_specific_city(message: types.Message, state: FSMContext):
         await state.update_data(city=city)
         await Start.waiting_for_preference.set()
 
-        keyboard = types.InlineKeyboardMarkup(resize_keyboard=True)
+        keyboard = types.InlineKeyboardMarkup()
         buttons = [
             types.InlineKeyboardButton(
                 text="Yes", callback_data="tracking_on"
