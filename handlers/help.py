@@ -6,5 +6,5 @@ from loader import dp
 
 @dp.message_handler(commands="help", state="*")
 async def give_help(message: types.Message):
-    """Provide some instructions on how to use the bot + brief info."""
-    await message.answer(HELP_MESSAGE)
+    """Provide instructions on how to use the bot."""
+    await message.answer(HELP_MESSAGE, disable_web_page_preview=True)

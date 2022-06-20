@@ -2,7 +2,6 @@
 
 import calendar
 from difflib import get_close_matches
-import random
 
 from aiogram import types
 from aiogram.dispatcher import FSMContext
@@ -154,17 +153,8 @@ async def turn_tracking_on(call: types.CallbackQuery, state: FSMContext):
         year_num, month_num = current_dt.year, current_dt.month
         weekday, days_in_month = calendar.monthrange(year_num, month_num)
 
-        days = []
-
-        for _ in range(days_in_month):
-            data = {
-                prayer: random.choice(["Not Prayed", "Prayed", "Late"])
-                for prayer in PRAYERS
-            }
-            days.append(data)
-
-        # data = {prayer: "Not Prayed" for prayer in PRAYERS}
-        # days = [data.copy() for _ in range(days_in_month)]
+        data = {prayer: "Not Prayed" for prayer in PRAYERS}
+        days = [data.copy() for _ in range(days_in_month)]
 
         # generate dictionary with NOT PRAYED data for each day of the month
         tracking_data = {
@@ -184,7 +174,6 @@ async def turn_tracking_on(call: types.CallbackQuery, state: FSMContext):
     else:
         await state.finish()
         await call.message.answer(SOMETHING_WRONG)
-
 
 
 @dp.callback_query_handler(

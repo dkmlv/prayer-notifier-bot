@@ -16,7 +16,7 @@ from data import (
     PIE_COORDINATES,
     WEEKDAYS,
 )
-from loader import bot
+from loader import bot, tracking
 from utils import cleanup_user, get_current_dt
 
 
@@ -146,7 +146,7 @@ async def send_photo(tg_user_id: int, image_path: str, caption: str):
             logging.info(f"Target [ID:{tg_user_id}]: success")
 
 
-async def send_prayer_calendar(tg_user_id: int, tz_info: str, data: dict):
+async def send_prayer_calendar(tg_user_id: int, tz_info: str):
     """Send the prayer calendar to the user.
 
     Parameters
@@ -155,10 +155,9 @@ async def send_prayer_calendar(tg_user_id: int, tz_info: str, data: dict):
         Telegram user id
     tz_info : str
         Timezone information string, like "Europe/Rome"
-    data : dict
-        User's prayer data (a single document from mongodb)
     """
 
+    data = await tracking.find_one({"tg_user_id": tg_user_id})
     await generate_prayer_calendar(tg_user_id, tz_info, data)
 
     caption = (

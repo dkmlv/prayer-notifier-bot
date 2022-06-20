@@ -1,6 +1,6 @@
 from aiogram import types
 
-from data import PLEASE_WAIT
+from data import NOTED, PLEASE_WAIT
 from loader import dp, tracking
 
 
@@ -23,4 +23,4 @@ async def mark_prayer(call: types.CallbackQuery):
             },
         )
 
-    await call.message.edit_text("Noted, thank you!")
+    await call.message.edit_text(NOTED)

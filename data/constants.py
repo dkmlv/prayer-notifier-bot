@@ -1,5 +1,7 @@
 import csv
+
 from PIL import ImageFont
+from aiogram.utils.emoji import emojize
 
 # ------------------------- DATA STUFF -------------------------
 with open("./data/cities.csv", newline="\n") as csvfile:
@@ -35,19 +37,27 @@ SEE_HELP = "See <b>/help</b> for more information."
 ASK_PREFERENCE = "Would you like to turn on the tracking feature?"
 PLEASE_WAIT = "<i><b>Please wait...</b></i>"
 HELP_MESSAGE = (
-    "<b>Instructions:</b>\n"
-    "Once you start a chat with the bot, you should type the name of "
-    "the city where you currently live. That's about it.\nYou will "
-    "receive reminders at around the time of every prayer.\n\n"
-    "<b>NOTE:</b> To change the city, just use the "
-    "<b>/start</b> command again."
+    f"<b>Never miss a prayer again!</b> {emojize(':clock8:')}\nI will remind "
+    "you when it's time to pray and can help you keep track of your prayers.\n"
+    f"\n<b>Commands</b> {emojize(':speech_balloon:')}\n"
+    "<i>/start</i> - initial setup process\n"
+    "<i>/help</i> - detailed info on commands and extra notes\n"
+    "<i>/prayer_times</i> - get prayer times for the day (will send tomorrow's"
+    " prayer times if there are no prayers left for today)\n"
+    "<i>/settings</i> - change user settings (resetting all settings will "
+    "erase all user data and start the initial setup process)\n"
+    "<i>/cancel</i> - cancel current operation (if you feel like everything "
+    "is frozen, try running this command)\n\n"
+    "If you encounter any issues, please reach out to @whereismyxanax\n"
+    "<a href='https://www.buymeacoffee.com/dkamolov'>Buy me a coffee</a> "
+    f"{emojize(':coffee:')}"
 )
 SEVERAL_MATCHES = "Which one of these did you mean?"
 SPELLING_MISTAKE = "Did you mean one of these cities: {}?"
 PICK_OPTION = "Please choose one of the options above."
 SETUP_DONE = (
-    "Great, you are now to set to receive reminders.\nYou can now get prayer "
-    "times using <b>/prayer_times</b> command."
+    "Great, you are now to set to receive reminders. You can get prayer times "
+    "using <b>/prayer_times</b> command."
 )
 SOMETHING_WRONG = "Something went wrong. Please try <b>/start</b> again later."
 
@@ -60,6 +70,7 @@ REGISTER_FIRST = (
     "You have not set anything up. Please use <b>/start</b> to register now."
 )
 OPERATION_CANCELLED = "Okay, cancelled."
+NOTED = "Noted, thank you!"
 
 # ------------------------- FONTS (PRAYER CAL) -------------------------
 MONTH_FONT = ImageFont.truetype("./assets/SinkinSans-700Bold.otf", 250)

@@ -9,10 +9,10 @@ async def set_default_commands(dp):
 
     await dp.bot.set_my_commands(
         [
-            types.BotCommand("start", "set up reminders"),
+            types.BotCommand("start", "initial setup process"),
+            types.BotCommand("help", "how to use the bot"),
             types.BotCommand("prayer_times", "get prayer times"),
             types.BotCommand("settings", "change settings"),
-            types.BotCommand("help", "how to use the bot"),
             types.BotCommand("cancel", "cancel current operation"),
         ]
     )

@@ -1,5 +1,10 @@
-from loader import cities
-from utils import get_prayer_data, schedule_all, schedule_calendar_gen, setup_city
+from loader import cities, tracking
+from utils import (
+    get_prayer_data,
+    schedule_all,
+    schedule_calendar_gen,
+    setup_city,
+)
 
 
 async def recreate_jobs():
@@ -18,4 +23,8 @@ async def recreate_jobs():
         prayer_times, hijri_date = await get_prayer_data(city)
         await schedule_all(city, prayer_times, hijri_date)
 
-    await schedule_calendar_gen()
+    tracking_on_users = await tracking.find().to_list(None)
+
+    for user in tracking_on_users:
+        tg_user_id = user["tg_user_id"]
+        await schedule_calendar_gen(tg_user_id)

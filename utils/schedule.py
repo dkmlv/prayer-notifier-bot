@@ -221,24 +221,27 @@ async def auto_schedule(city: str, tz_info: str):
         )
 
 
-async def schedule_calendar_gen():
-    """Schedule calendar generation for all users who have tracking on."""
-    tracking_on_users = await tracking.find().to_list(None)
+async def schedule_calendar_gen(tg_user_id: int):
+    """Schedule calendar generation for one user.
 
-    for user in tracking_on_users:
-        tg_user_id = user["tg_user_id"]
-        tz_info = await get_users_timezone(tg_user_id)
+    Parameters
+    ----------
+    tg_user_id : int
+        Telegram user id
+    """
 
-        sched.add_job(
-            send_prayer_calendar,
-            "cron",
-            day=1,
-            month="*",
-            hour=0,
-            minute=5,
-            timezone=tz_info,
-            args=[tg_user_id, tz_info, user],
-            id=f"Calendar_{tg_user_id}",
-            replace_existing=True,
-            misfire_grace_time=86400,
-        )
+    tz_info = await get_users_timezone(tg_user_id)
+    sched.add_job(
+        send_prayer_calendar,
+        "cron",
+        day=1,
+        month="*",
+        hour=random.randint(0, 1),
+        minute=random.randint(5, 59),
+        second=random.randint(0, 59),
+        timezone=tz_info,
+        args=[tg_user_id, tz_info],
+        id=f"Calendar_{tg_user_id}",
+        replace_existing=True,
+        misfire_grace_time=86400,
+    )
