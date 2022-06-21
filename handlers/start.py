@@ -10,6 +10,7 @@ from data import (
     CHECK_SPREADSHEET,
     CITIES,
     DATA,
+    DEMO_GIF,
     FIRST_TIME_USER,
     INTRODUCTION,
     PICK_OPTION,
@@ -75,6 +76,7 @@ async def validate_city(message: types.Message, state: FSMContext):
         ]
         keyboard.add(*buttons)
 
+        await message.answer_animation(DEMO_GIF)
         await message.answer(ASK_PREFERENCE, reply_markup=keyboard)
     elif len(matches) > 1:
         # more than 1 city exists with that name
@@ -123,6 +125,7 @@ async def validate_specific_city(message: types.Message, state: FSMContext):
         ]
         keyboard.add(*buttons)
 
+        await message.answer_animation(DEMO_GIF)
         await message.answer(ASK_PREFERENCE, reply_markup=keyboard)
     else:
         await message.answer(PICK_OPTION)

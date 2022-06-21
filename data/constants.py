@@ -105,3 +105,8 @@ CIRCLE_COORDS = {
     "Late": 1675,
     "Prayed": 3095,
 }
+
+# ------------------------- DEMO GIF FILE ID -------------------------
+DEMO_GIF = (
+    "CgACAgIAAxkBAAIF6WKxnHnkIi626oxlBsouv9591OfXAAKXGwACnUqISd_r4dGZ3UlcKQQ"
+)

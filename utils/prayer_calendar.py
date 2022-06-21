@@ -5,7 +5,7 @@ import os
 from typing import Dict
 
 from PIL import Image, ImageDraw
-from aiogram import exceptions
+from aiogram import exceptions, types
 
 from data import (
     CIRCLE_COORDS,
@@ -121,29 +121,30 @@ async def send_photo(tg_user_id: int, image_path: str, caption: str):
         The caption to send with the image
     """
 
-    with open(image_path, "rb") as calendar_img:
-        try:
-            await bot.send_photo(tg_user_id, calendar_img, caption=caption)
-        except exceptions.BotBlocked:
-            logging.error(f"Target [ID:{tg_user_id}]: blocked by user")
-            await cleanup_user(tg_user_id)
-        except exceptions.ChatNotFound:
-            logging.error(f"Target [ID:{tg_user_id}]: invalid user ID")
-        except exceptions.RetryAfter as e:
-            logging.error(
-                f"Target [ID:{tg_user_id}]: Flood limit is exceeded. "
-                f"Sleep {e.timeout} seconds."
-            )
-            await asyncio.sleep(e.timeout)
-            # Recursive call
-            return await send_photo(tg_user_id, image_path, caption)
-        except exceptions.UserDeactivated:
-            logging.error(f"Target [ID:{tg_user_id}]: user is deactivated")
-            await cleanup_user(tg_user_id)
-        except exceptions.TelegramAPIError:
-            logging.exception(f"Target [ID:{tg_user_id}]: failed")
-        else:
-            logging.info(f"Target [ID:{tg_user_id}]: success")
+    try:
+        await bot.send_photo(
+            tg_user_id, types.InputFile(image_path), caption=caption
+        )
+    except exceptions.BotBlocked:
+        logging.error(f"Target [ID:{tg_user_id}]: blocked by user")
+        await cleanup_user(tg_user_id)
+    except exceptions.ChatNotFound:
+        logging.error(f"Target [ID:{tg_user_id}]: invalid user ID")
+    except exceptions.RetryAfter as e:
+        logging.error(
+            f"Target [ID:{tg_user_id}]: Flood limit is exceeded. "
+            f"Sleep {e.timeout} seconds."
+        )
+        await asyncio.sleep(e.timeout)
+        # Recursive call
+        return await send_photo(tg_user_id, image_path, caption)
+    except exceptions.UserDeactivated:
+        logging.error(f"Target [ID:{tg_user_id}]: user is deactivated")
+        await cleanup_user(tg_user_id)
+    except exceptions.TelegramAPIError:
+        logging.exception(f"Target [ID:{tg_user_id}]: failed")
+    else:
+        logging.info(f"Target [ID:{tg_user_id}]: success")
 
 
 async def send_prayer_calendar(tg_user_id: int, tz_info: str):
