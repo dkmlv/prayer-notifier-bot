@@ -108,5 +108,5 @@ CIRCLE_COORDS = {
 
 # ------------------------- DEMO GIF FILE ID -------------------------
 DEMO_GIF = (
-    "CgACAgIAAxkBAAIF6WKxnHnkIi626oxlBsouv9591OfXAAKXGwACnUqISd_r4dGZ3UlcKQQ"
+    "CgACAgIAAxkBAAJMYmKxrb28qDBOHBH1i6Hj-oG0M_tQAAKXGwACnUqISeM0b-AfHynZKQQ"
 )
