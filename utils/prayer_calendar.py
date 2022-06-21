@@ -1,4 +1,5 @@
 import asyncio
+import calendar
 import logging
 import operator
 import os
@@ -14,6 +15,7 @@ from data import (
     MONTH_FONT,
     NUM_FONT,
     PIE_COORDINATES,
+    PRAYERS,
     WEEKDAYS,
 )
 from loader import bot, tracking
@@ -170,3 +172,22 @@ async def send_prayer_calendar(tg_user_id: int, tz_info: str):
     await send_photo(tg_user_id, calendar_img_path, caption)
 
     os.remove(calendar_img_path)
+
+    # generate dictionary with NOT PRAYED data for each day of the new month
+    current_dt = get_current_dt(tz_info)
+    current_month = current_dt.strftime("%B")
+
+    year_num, month_num = current_dt.year, current_dt.month
+    weekday, days_in_month = calendar.monthrange(year_num, month_num)
+
+    data = {prayer: "Not Prayed" for prayer in PRAYERS}
+    days = [data.copy() for _ in range(days_in_month)]
+
+    new_month_data = {
+        "starts_from": WEEKDAYS[weekday],
+        "days": days,
+    }
+    await tracking.update_one(
+        {"tg_user_id": tg_user_id},
+        {"$set": {f"{year_num}.{current_month}": new_month_data}},
+    )
