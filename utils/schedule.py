@@ -210,7 +210,7 @@ async def auto_schedule(city: str, tz_info: str):
 
         last_prayer_dt = parser.parse(prayer_times["Isha"])
 
-        run_dt = last_prayer_dt + dt.timedelta(minutes=15)
+        run_dt = last_prayer_dt + dt.timedelta(minutes=45)
         sched.add_job(
             auto_schedule,
             "date",

@@ -60,7 +60,7 @@ async def setup_city(city: str) -> bool:
     }
     await cities.update_one({"city": city}, {"$set": city_data}, upsert=True)
 
-    run_dt = last_prayer_dt + dt.timedelta(minutes=15)
+    run_dt = last_prayer_dt + dt.timedelta(minutes=45)
     sched.add_job(
         auto_schedule,
         "date",
