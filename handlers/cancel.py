@@ -6,6 +6,7 @@ from loader import dp
 
 
 @dp.message_handler(commands="cancel", state="*")
+@dp.throttled(rate=3)
 async def cancel_current_operation(message: types.Message, state: FSMContext):
     """Reset state, inform operation was cancelled."""
     await state.finish()

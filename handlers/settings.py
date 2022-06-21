@@ -7,6 +7,7 @@ from utils import cleanup_user
 
 
 @dp.message_handler(commands="settings")
+@dp.throttled(rate=3)
 async def show_settings(message: types.Message):
     """Show settings to the user."""
     tg_user_id = message.from_user.id

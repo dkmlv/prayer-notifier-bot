@@ -5,6 +5,7 @@ from utils import generate_overview_msg
 
 
 @dp.message_handler(commands="prayer_times")
+@dp.throttled(rate=3)
 async def prayer_times(message: types.Message):
     """Send today's prayer data."""
     tg_user_id = message.from_user.id

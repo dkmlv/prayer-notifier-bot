@@ -28,6 +28,7 @@ from utils import get_current_dt, get_tz_info, register_user
 
 
 @dp.message_handler(commands="start")
+@dp.throttled(rate=3)
 async def greet_user(message: types.Message):
     """Greet user, begin setup process if they are a first-time user."""
     await message.answer(INTRODUCTION)
