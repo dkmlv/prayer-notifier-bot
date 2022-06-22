@@ -42,11 +42,13 @@ async def get_prayer_times(
         "country": country_name,
         "state": state_name,
         "school": 1,
-        "method": 3,
         "month": month,
         "year": year,
         "iso8601": "true",
     }
+
+    if country_name == "Uzbekistan":
+        params["method"] = 3
 
     try:
         async with session.get(GET_TIMES_URL, params=params) as resp:

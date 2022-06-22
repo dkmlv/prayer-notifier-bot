@@ -48,6 +48,7 @@ HELP_MESSAGE = (
     "erase all user data and start the initial setup process)\n"
     "<i>/cancel</i> - cancel current operation (if you feel like everything "
     "is frozen, try running this command)\n\n"
+    "<b>NOTE:</b> the bot uses <i>Hanafi</i> school of thought.\n\n"
     "If you encounter any issues, please reach out to @whereismyxanax\n"
     "<a href='https://www.buymeacoffee.com/dkamolov'>Buy me a coffee</a> "
     f"{emojize(':coffee:')}"
