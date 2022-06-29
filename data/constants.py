@@ -102,9 +102,9 @@ PIE_COORDINATES = {
 }
 FIRST_MONDAY = (220, 942)
 CIRCLE_COORDS = {
-    "Not Prayed": 290,
-    "Late": 1675,
-    "Prayed": 3095,
+    "Not Prayed": 325,
+    "Late": 1710,
+    "Prayed": 3110,
 }
 
 # ------------------------- DEMO GIF FILE ID -------------------------
