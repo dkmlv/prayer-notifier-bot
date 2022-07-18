@@ -81,15 +81,18 @@ def process_prayer_times(times: Dict[str, str]) -> Dict[str, str]:
         Processed prayer times
     """
 
-    not_needed = ["Imsak", "Sunset", "Midnight"]
+    needed = ["Fajr", "Sunrise", "Dhuhr", "Asr", "Maghrib", "Isha"]
+    processed_times = dict()
 
-    for item in not_needed:
-        times.pop(item)
+    for item in needed:
+        processed_times[item] = times.pop(item)
 
     # time will look like: "2022-06-01T04:03:00-06:00 (MDT)"
-    times = {prayer: time.split()[0] for prayer, time in times.items()}
+    processed_times = {
+        prayer: time.split()[0] for prayer, time in processed_times.items()
+    }
 
-    return times
+    return processed_times
 
 
 async def update_prayer_times(
