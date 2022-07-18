@@ -1,3 +1,5 @@
+import asyncio
+
 from loader import cities, tracking
 from utils import (
     get_prayer_data,
@@ -22,6 +24,8 @@ async def recreate_jobs():
         await setup_city(city)
         prayer_times, hijri_date = await get_prayer_data(city)
         await schedule_all(city, prayer_times, hijri_date)
+        # to try and avoid sending too many requests
+        await asyncio.sleep(5)
 
     tracking_on_users = await tracking.find().to_list(None)
 
