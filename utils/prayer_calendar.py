@@ -1,5 +1,6 @@
 import asyncio
 import calendar
+import datetime as dt
 import logging
 import operator
 import os
@@ -64,8 +65,8 @@ async def generate_prayer_calendar(tg_user_id: int, tz_info: str, data: dict):
     """
 
     now = get_current_dt(tz_info)
-    month_ago = now.replace(month=now.month - 1)
-    last_month_name, year = month_ago.strftime("%B"), str(month_ago.year)
+    days_ago = now - dt.timedelta(days=5)
+    last_month_name, year = days_ago.strftime("%B"), str(days_ago.year)
 
     last_month_data = data[year][last_month_name]
     starts_from, days = last_month_data["starts_from"], last_month_data["days"]

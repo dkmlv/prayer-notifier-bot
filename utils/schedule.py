@@ -78,7 +78,7 @@ async def schedule_one(
         Telegram has limits on how many messages can be sent per second.
     """
 
-    if not seconds:
+    if seconds is None:
         seconds = random.randint(0, 59)
 
     sunrise = parser.parse(prayer_times.pop("Sunrise")).strftime("%H:%M")
@@ -243,5 +243,5 @@ async def schedule_calendar_gen(tg_user_id: int):
         args=[tg_user_id, tz_info],
         id=f"Calendar_{tg_user_id}",
         replace_existing=True,
-        misfire_grace_time=86400,
+        misfire_grace_time=172800,
     )
