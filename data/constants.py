@@ -49,9 +49,7 @@ HELP_MESSAGE = (
     "<i>/cancel</i> - cancel current operation (if you feel like everything "
     "is frozen, try running this command)\n\n"
     "<b>NOTE:</b> the bot uses <i>Hanafi</i> school of thought.\n\n"
-    "If you encounter any issues, please reach out to @whereismyxanax\n"
-    "<a href='https://www.buymeacoffee.com/dkamolov'>Buy me a coffee</a> "
-    f"{emojize(':coffee:')}"
+    "If you encounter any issues, please reach out to @nil_pointer\n"
 )
 SEVERAL_MATCHES = "Which one of these did you mean?"
 SPELLING_MISTAKE = "Did you mean one of these cities: {}?"
