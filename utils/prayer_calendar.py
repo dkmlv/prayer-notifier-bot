@@ -75,7 +75,7 @@ async def generate_prayer_calendar(tg_user_id: int, tz_info: str, data: dict):
     if starts_from == "Monday" and num_of_days == 28:
         rows = 4
     elif (starts_from == "Sunday" and num_of_days in (30, 31)) or (
-        starts_from == "Saturday" and num_of_days == 30
+        starts_from == "Saturday" and num_of_days == 31
     ):
         rows = 6
     else:
