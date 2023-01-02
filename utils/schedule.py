@@ -243,5 +243,5 @@ async def schedule_calendar_gen(tg_user_id: int):
         args=[tg_user_id, tz_info],
         id=f"Calendar_{tg_user_id}",
         replace_existing=True,
-        misfire_grace_time=172800,
+        misfire_grace_time=3600,
     )
