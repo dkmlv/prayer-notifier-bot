@@ -101,7 +101,7 @@ async def generate_prayer_calendar(tg_user_id: int, tz_info: str, data: dict):
             calendar_img.paste(pie_chart_img, (x, y))
 
         for key in prayers:
-            percentage = str(round(prayers[key] / (5 * 30) * 100))
+            percentage = str(round(prayers[key] / (5 * num_of_days) * 100))
             offset = (len(percentage) - 1) * 35
 
             ImageDraw.Draw(calendar_img).text(
