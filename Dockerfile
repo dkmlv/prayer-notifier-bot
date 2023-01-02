@@ -1,4 +1,5 @@
 FROM python:3.9.9
+STOPSIGNAL SIGINT
 
 ENV VIRTUAL_ENV=/opt/venv
 RUN python3 -m venv $VIRTUAL_ENV
